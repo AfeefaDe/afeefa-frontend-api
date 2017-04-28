@@ -6,6 +6,8 @@ git_source(:github) do |repo_name|
 end
 
 
+# Use mysql2 as the database for Active Record
+gem 'mysql2'
 # Bundle edge Rails instead: gem 'rails', github: 'rails/rails'
 gem 'rails', '~> 5.0.2'
 # Use sqlite3 as the database for Active Record
