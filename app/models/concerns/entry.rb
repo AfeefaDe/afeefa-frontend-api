@@ -34,7 +34,7 @@ module Entry
       :category => self.category,
       :certified => self.certified_sfr,
       :description => self.description,
-      :descriptionShort => 'Noch NIX',
+      :descriptionShort => self.short_description,
       :legacyEntryId => self.legacy_entry_id,
       :facebook => self.facebook || '',
       :forChildren => self.for_children,
