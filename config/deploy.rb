@@ -57,7 +57,7 @@ namespace :deploy do
             if fetch(:stage).to_s == 'production'
               'frontend-api'
             else
-              'dev-frontend-api'
+              'frontend-dev-api'
             end
         execute "svc -du ~/service/#{api}" # maybe we can use -h instead of -du
       end
@@ -72,7 +72,7 @@ namespace :deploy do
             if fetch(:stage).to_s == 'production'
               'frontend-api'
             else
-              'dev-frontend-api'
+              'frontend-dev-api'
             end
         execute "svc -d ~/service/#{api}" # maybe we can use -h instead of -du
       end
@@ -87,7 +87,7 @@ namespace :deploy do
             if fetch(:stage).to_s == 'production'
               'frontend-api'
             else
-              'dev-frontend-api'
+              'frontend-dev-api'
             end
         execute "svc -u ~/service/#{api}" # maybe we can use -h instead of -du
       end
