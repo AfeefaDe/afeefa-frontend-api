@@ -3,7 +3,7 @@ lock '3.6.1'
 
 # set :application, 'my_app_name'
 # set :repo_url, 'git@example.com:me/my_repo.git'
-set :application, 'afeefa-frontend-frontend-api'
+set :application, 'afeefa-frontend-api'
 set :repo_url, 'https://github.com/AfeefaDe/afeefa-frontend-api.git'
 
 # Default branch is :master
@@ -11,7 +11,7 @@ set :repo_url, 'https://github.com/AfeefaDe/afeefa-frontend-api.git'
 
 # Default deploy_to directory is /var/www/my_app_name
 # set :deploy_to, '/var/www/my_app_name'
-set :deploy_to, '/home/afeefa/rails/afeefa-frontend-frontend-api'
+set :deploy_to, '/home/afeefa/rails/afeefa-frontend-api'
 
 # Default value for :scm is :git
 # set :scm, :git
