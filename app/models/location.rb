@@ -10,7 +10,6 @@ class Location < ApplicationRecord
       :arrival => self.directions,
       :city => self.city,
       :lat => self.lat,
-      :locale => 'de',
       :lon => self.lon,
       :openingHours => self.openingHours || '',
       :placename => self.placename,
