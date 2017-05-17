@@ -9,7 +9,7 @@ module Entry
     has_many :locations, as: :locatable
     has_many :contact_infos, as: :contactable
 
-    attr_accessor :type, :phone, :mail, :facebook, :web, :contact_person, :spoken_languages
+    attr_accessor :type, :phone, :mail, :social_media, :web, :contact_person, :spoken_languages
   end
 
   def as_json(*args)
@@ -23,7 +23,7 @@ module Entry
     if c then
       @phone = c.phone
       @mail = c.mail
-      @facebook = c.facebook
+      @social_media = c.social_media
       @web = c.web
       @contact_person = c.contact_person
       @spoken_languages = c.spoken_languages
@@ -36,7 +36,7 @@ module Entry
       :description => self.description,
       :descriptionShort => self.short_description,
       :legacyEntryId => self.legacy_entry_id,
-      :facebook => self.facebook || '',
+      :socialMedia => self.social_media || '',
       :forChildren => self.for_children,
       :image => self.media_url,
       :imageType => self.media_type,
