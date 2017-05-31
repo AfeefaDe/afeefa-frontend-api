@@ -8,7 +8,7 @@ class Orga < ApplicationRecord
   }
   default_scope { without_root }
 
-  after_initialize do |orga|
-    orga.type = 0
+  after_initialize do |entry|
+    entry.type = 0
   end
 end

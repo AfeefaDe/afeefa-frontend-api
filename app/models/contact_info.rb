@@ -1,3 +1,3 @@
 class ContactInfo < ApplicationRecord
-  belongs_to :orgas, foreign_key: 'contactable_id'
+  belongs_to :contactable, polymorphic: true
 end

@@ -1,8 +1,8 @@
 class Event < ApplicationRecord
   include Entry
 
-  after_initialize do |orga|
-    orga.type = 2
+  after_initialize do |entry|
+    entry.type = 2
   end
 
   def as_json(*args)

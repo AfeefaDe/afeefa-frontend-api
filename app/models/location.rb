@@ -1,6 +1,6 @@
 class Location < ApplicationRecord
 
-  belongs_to :orgas, foreign_key: 'locatable_id'
+  belongs_to :locateable, polymorphic: true
 
   attr_accessor :openingHours
 
