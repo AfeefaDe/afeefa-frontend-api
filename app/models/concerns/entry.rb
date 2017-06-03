@@ -38,7 +38,7 @@ module Entry
     if contact
       @phone = contact.phone
       @mail = contact.mail
-      @facebook = contact.social_media
+      @social_media = contact.social_media
       @web = contact.web
       @contact_person = contact.contact_person
       @spoken_languages = contact.spoken_languages
@@ -51,7 +51,7 @@ module Entry
         description: trans_description || self.description,
         descriptionShort: trans_short_description || self.short_description,
         entryId: self.legacy_entry_id,
-        facebook: self.facebook || '',
+        facebook: self.social_media || '',
         forChildren: self.for_children,
         image: self.media_url,
         imageType: self.media_type,
