@@ -66,6 +66,7 @@ module Entry
         tags: '',
         type: self.type,
         web: self.web || '',
+        inheritance: self.inheritance,
         created_at: self.created_at,
         updated_at: self.updated_at
     }
