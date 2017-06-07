@@ -84,7 +84,6 @@ GEM
     nokogiri (1.7.1)
       mini_portile2 (~> 2.1.0)
     rack (2.0.1)
-    rack-cors (0.4.1)
     rack-test (0.6.3)
       rack (>= 1.0)
     rails (5.0.2)
@@ -150,7 +149,6 @@ DEPENDENCIES
   capistrano-rails
   listen (~> 3.0.5)
   mysql2
-  rack-cors
   rails (~> 5.0.2)
   spring
   spring-watcher-listen (~> 2.0.0)
@@ -159,4 +157,4 @@ DEPENDENCIES
   unicorn
 
 BUNDLED WITH
-   1.13.6
+   1.14.6
