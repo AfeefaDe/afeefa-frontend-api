@@ -4,29 +4,38 @@ class EntriesController < ApplicationController
   SUPPORTED_LOCALES = %w(ar de en es fa fr ku ps ru sq sr ti tr ur)
 
   def index
-
-    if !params['locale'].nil? && params['locale'].in?(SUPPORTED_LOCALES)
+    if params['locale'].present? && params['locale'].in?(SUPPORTED_LOCALES)
       if params['locale'] == DEFAULT_LOCALE
-        orgas = include(Orga).where(state: 'active')
-        events = include(Event).where(state: 'active')
+        orgas = get_entries(Orga)
+        events = get_entries(Event)
       else
-        orgas = include(Orga).includes(:translation_caches).where(state: 'active')
-        events = include(Event).includes(:translation_caches).where(state: 'active')
+        orgas = get_entries(Orga, with_translations: true)
+        events = get_entries(Event, with_translations: true)
       end
 
-      render json: {
+      render(
+        json: {
           marketentries: orgas + events
-      },
-             status: :ok,
-             language: params['locale'] || DEFAULT_LOCALE
+        },
+        status: :ok,
+        language: params['locale'] || DEFAULT_LOCALE
+      )
     else
-      render json: {error: 'locale is not supported'}, status: :unprocessable_entity
+      render json: { error: 'locale is not supported' }, status: :unprocessable_entity
     end
   end
 
   private
 
-  def include (query)
-    query.includes(:category, :sub_category, :locations, :contact_infos)
+  def get_entries(klazz, with_translations: false)
+    entries =
+      klazz.
+        includes(:category, :sub_category, :locations, :contact_infos).
+        where(state: 'active')
+    if with_translations
+      entries = entries.includes(:translation_caches)
+    end
+    entries
   end
+
 end

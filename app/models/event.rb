@@ -6,14 +6,16 @@ class Event < ApplicationRecord
   end
 
   def as_json(*args)
-    e = super
+    json = super
 
-    e[:date_start] = self.date_start
-    e[:has_time_start] = self.time_start
-    e[:date_end] = self.date_end
-    e[:has_time_end] = self.time_end
+    json[:dateFrom] = self.date_start.try(:strftime, '%F')
+    json[:timeFrom] = self.date_start.try(:strftime, '%H:%M')
+    json[:has_time_start] = self.time_start
+    json[:dateTo] = self.date_end.try(:strftime, '%F')
+    json[:timeTo] = self.date_end.try(:strftime, '%H:%M')
+    json[:has_time_end] = self.time_end
 
-    e
+    json
   end
 
 end
