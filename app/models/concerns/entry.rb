@@ -17,9 +17,7 @@ module Entry
     location = self.locations.first
     contact = self.contact_infos.first
 
-    trans_title = nil
-    trans_description = nil
-    trans_short_description = nil
+    trans_title, trans_description, trans_short_description = nil
 
     if args[0][:language] != EntriesController::DEFAULT_LOCALE
       self.translation_caches.each do |t|
@@ -27,6 +25,7 @@ module Entry
           trans_title = t[:title]
           trans_description = t[:description]
           trans_short_description = t[:short_description]
+          break
         end
       end
     end
