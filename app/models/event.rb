@@ -5,6 +5,15 @@ class Event < ApplicationRecord
     entry.type = 2
   end
 
+  scope :upcoming, -> {
+    now = Time.now.beginning_of_day
+    # date_start >= today 00:00
+    # date_end >= today 00:00
+    where('date_start >= ?', now).
+    or(where('date_end >= ?', now))
+  }
+  default_scope { upcoming }
+
   def as_json(*args)
     json = super
 
