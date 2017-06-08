@@ -44,6 +44,14 @@ module Entry
       @spoken_languages = contact.spoken_languages
     end
 
+
+    inheritance = self.inheritance || ''
+    inheritance = {
+      short_description: inheritance.include?('short_description'),
+      contact_infos: inheritance.include?('contact_infos'),
+      locations: inheritance.include?('locations')
+    }
+
     {
         id: self.id,
         category: self.category,
@@ -66,7 +74,7 @@ module Entry
         tags: '',
         type: self.type,
         web: self.web || '',
-        inheritance: self.inheritance,
+        inheritance: inheritance,
         created_at: self.created_at,
         updated_at: self.updated_at
     }
