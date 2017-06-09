@@ -10,6 +10,7 @@ class Orga < ApplicationRecord
 
   after_initialize do |entry|
     entry.type = 0
+    entry.entryType = 'orga'
   end
 
   # CLASS METHODS

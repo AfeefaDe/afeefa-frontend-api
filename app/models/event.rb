@@ -3,6 +3,7 @@ class Event < ApplicationRecord
 
   after_initialize do |entry|
     entry.type = 2
+    entry.entryType = 'event'
   end
 
   scope :upcoming, -> {
@@ -17,7 +18,7 @@ class Event < ApplicationRecord
   def as_json(*args)
     json = super
 
-    json[:hostOrgaId] = Orga.is_root_orga?(self.orga_id) ? nil : self.orga_id
+    json[:parentOrgaId] = Orga.is_root_orga?(self.orga_id) ? nil : self.orga_id
 
     date_start = self.date_start.try(:in_time_zone, 'Berlin')
     date_end = self.date_end.try(:in_time_zone, 'Berlin')

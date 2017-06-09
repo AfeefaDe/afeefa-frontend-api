@@ -10,7 +10,7 @@ module Entry
     has_many :contact_infos, as: :contactable
     has_many :translation_caches, as: :cacheable, dependent: :destroy, class_name: 'TranslationCache'
 
-    attr_accessor :type, :phone, :mail, :social_media, :web, :contact_person, :spoken_languages
+    attr_accessor :type, :entryType, :phone, :mail, :social_media, :web, :contact_person, :spoken_languages
   end
 
   def as_json(*args)
@@ -53,6 +53,7 @@ module Entry
 
     {
         id: self.id,
+        entryType: self.entryType,
         category: self.category,
         certified: self.certified_sfr,
         description: trans_description || self.description,
