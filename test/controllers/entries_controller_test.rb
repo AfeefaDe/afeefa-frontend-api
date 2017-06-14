@@ -15,10 +15,28 @@ class EntriesControllerTest < ActionController::TestCase
     get :index, params: { locale: 'de' }
     json = JSON.parse(response.body)
     assert_response :ok
-    assert json['marketentries'].last.key?('dateFrom')
-    assert json['marketentries'].last.key?('timeFrom')
-    assert json['marketentries'].last.key?('dateTo')
-    assert json['marketentries'].last.key?('timeTo')
+
+    json = JSON.parse(response.body)
+    assert_equal 4, json['marketentries'].size
+    assert @event = json['marketentries'].last
+    assert @event.key?('dateFrom')
+    assert @event.key?('timeFrom')
+    assert @event.key?('dateTo')
+    assert @event.key?('timeTo')
+  end
+
+  test 'fail for unsupported locale' do
+    exception = assert_raise do
+      get :index, params: { locale: 'foo' }
+    end
+    assert_equal 'locale is not supported', exception.message
+  end
+
+  test 'cache index result' do
+    assert_difference -> { Dir.glob(File.join(TranslationCacheMetaDatum::CACHE_PATH, '*')).count } do
+      get :index, params: { locale: 'de' }
+      assert_response :ok
+    end
   end
 
   test 'get de by default' do
