@@ -5,11 +5,11 @@ class EntriesControllerTest < ActionController::TestCase
   setup do
     orga = Orga.new(state: :active)
     assert orga.save(validate: false)
-    @event = Event.new(state: :active)
+    @event = Event.new(state: :active, date_start: 5.days.from_now)
     assert @event.save(validate: false)
     location = @event.locations.new
     assert location.save(validate: false)
-    event2 = Event.new(state: :active)
+    event2 = Event.new(state: :active, date_start: 5.days.from_now)
     assert event2.save(validate: false)
 
     FileUtils.rm_rf(TranslationCacheMetaDatum::CACHE_PATH)
@@ -18,7 +18,19 @@ class EntriesControllerTest < ActionController::TestCase
     init_translation_cache('de')
   end
 
-  test 'get filter title and description' do
+  test 'get index' do
+    get :index, params: { locale: 'de' }
+    assert_response :ok
+    json = JSON.parse(response.body)
+    assert_equal 4, json['marketentries'].size
+    assert @event = json['marketentries'].last
+    assert @event.key?('dateFrom')
+    assert @event.key?('timeFrom')
+    assert @event.key?('dateTo')
+    assert @event.key?('timeTo')
+  end
+
+  test 'get de by default' do
     get :index, params: { locale: 'de' }
     assert_response :ok
     json = JSON.parse(response.body)

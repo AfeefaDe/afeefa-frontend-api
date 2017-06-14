@@ -10,16 +10,14 @@ module Entry
     has_many :contact_infos, as: :contactable
     has_many :translation_caches, as: :cacheable, dependent: :destroy, class_name: 'TranslationCache'
 
-    attr_accessor :type, :phone, :mail, :social_media, :web, :contact_person, :spoken_languages
+    attr_accessor :type, :entryType, :phone, :mail, :social_media, :web, :contact_person, :spoken_languages
   end
 
   def as_json(*args)
     location = self.locations.first
     contact = self.contact_infos.first
 
-    trans_title = nil
-    trans_description = nil
-    trans_short_description = nil
+    trans_title, trans_description, trans_short_description = nil
 
     if args[0][:language] != TranslationCacheMetaDatum::DEFAULT_LOCALE
       self.translation_caches.each do |t|
@@ -27,6 +25,7 @@ module Entry
           trans_title = t[:title]
           trans_description = t[:description]
           trans_short_description = t[:short_description]
+          break
         end
       end
     end
@@ -44,8 +43,17 @@ module Entry
       @spoken_languages = contact.spoken_languages
     end
 
+
+    inheritance = self.inheritance || ''
+    inheritance = {
+      short_description: inheritance.include?('short_description'),
+      contact_infos: inheritance.include?('contact_infos'),
+      locations: inheritance.include?('locations')
+    }
+
     {
         id: self.id,
+        entryType: self.entryType,
         category: self.category,
         certified: self.certified_sfr,
         description: trans_description || self.description,
@@ -66,7 +74,7 @@ module Entry
         tags: '',
         type: self.type,
         web: self.web || '',
-        inheritance: self.inheritance,
+        inheritance: inheritance,
         created_at: self.created_at,
         updated_at: self.updated_at
     }

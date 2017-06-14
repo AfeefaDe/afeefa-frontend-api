@@ -1,10 +1,12 @@
 class EntriesController < ApplicationController
 
   def index
-    if (locale = params['locale']).present? && locale.in?(TranslationCacheMetaDatum::SUPPORTED_LOCALES)
+    locale = params['locale'] || TranslationCacheMetaDatum::DEFAULT_LOCALE
+
+    if locale.in?(TranslationCacheMetaDatum::SUPPORTED_LOCALES)
       render_data(locale)
     else
-      render json: { error: 'locale is not supported' }, status: :unprocessable_entity
+      raise 'locale is not supported'
     end
   end
 
@@ -35,5 +37,4 @@ class EntriesController < ApplicationController
       language: locale || TranslationCacheMetaDatum::DEFAULT_LOCALE
     )
   end
-
 end
