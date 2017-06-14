@@ -22,11 +22,7 @@ class EntriesController < ApplicationController
       end
     else
       content = TranslationCacheMetaDatum.build_translation_data(locale).to_json
-      if Rails.env.test?
-        FrontendCacheRebuildJob.perform_now(locale, content: content)
-      else
-        FrontendCacheRebuildJob.perform_later(locale, content: content)
-      end
+      FrontendCacheRebuildJob.perform_now(locale, content: content)
     end
 
     content ||=
