@@ -21,7 +21,7 @@ module Entry
     trans_description = nil
     trans_short_description = nil
 
-    if args[0][:language] != EntriesController::DEFAULT_LOCALE
+    if args[0][:language] != TranslationCacheMetaDatum::DEFAULT_LOCALE
       self.translation_caches.each do |t|
         if t.language == args[0][:language]
           trans_title = t[:title]

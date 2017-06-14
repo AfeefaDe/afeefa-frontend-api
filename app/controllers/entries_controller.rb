@@ -1,25 +1,8 @@
 class EntriesController < ApplicationController
 
-  DEFAULT_LOCALE = 'de'
-  SUPPORTED_LOCALES = %w(ar de en es fa fr ku ps ru sq sr ti tr ur)
-
   def index
-    if params['locale'].present? && params['locale'].in?(SUPPORTED_LOCALES)
-      if params['locale'] == DEFAULT_LOCALE
-        orgas = get_entries(Orga)
-        events = get_entries(Event)
-      else
-        orgas = get_entries(Orga, with_translations: true)
-        events = get_entries(Event, with_translations: true)
-      end
-
-      render(
-        json: {
-          marketentries: orgas + events
-        },
-        status: :ok,
-        language: params['locale'] || DEFAULT_LOCALE
-      )
+    if (locale = params['locale']).present? && locale.in?(TranslationCacheMetaDatum::SUPPORTED_LOCALES)
+      render_data(locale)
     else
       render json: { error: 'locale is not supported' }, status: :unprocessable_entity
     end
@@ -27,15 +10,34 @@ class EntriesController < ApplicationController
 
   private
 
-  def get_entries(klazz, with_translations: false)
-    entries =
-      klazz.
-        includes(:category, :sub_category, :locations, :contact_infos).
-        where(state: 'active')
-    if with_translations
-      entries = entries.includes(:translation_caches)
+  def render_data(locale)
+    meta = TranslationCacheMetaDatum.find_by(locale: locale)
+    if meta
+      unless meta.cache_valid?
+        if Rails.env.test?
+          FrontendCacheRebuildJob.perform_now(locale)
+        else
+          FrontendCacheRebuildJob.perform_later(locale)
+        end
+      end
+    else
+      content = TranslationCacheMetaDatum.build_translation_data(locale).to_json
+      if Rails.env.test?
+        FrontendCacheRebuildJob.perform_now(locale, content: content)
+      else
+        FrontendCacheRebuildJob.perform_later(locale, content: content)
+      end
     end
-    entries
+
+    content ||=
+      TranslationCacheMetaDatum.cached_content(locale) ||
+        { marketentries: [] }
+
+    render(
+      json: content,
+      status: :ok,
+      language: locale || TranslationCacheMetaDatum::DEFAULT_LOCALE
+    )
   end
 
 end
