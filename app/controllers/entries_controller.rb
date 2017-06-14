@@ -12,7 +12,7 @@ class EntriesController < ApplicationController
 
   def render_data(locale)
     meta = TranslationCacheMetaDatum.find_by(locale: locale)
-    if meta
+    if meta && meta.updated_at > 10.minutes.ago && !params[:force_refresh]
       unless meta.cache_valid?
         if Rails.env.test?
           FrontendCacheRebuildJob.perform_now(locale)
@@ -26,7 +26,7 @@ class EntriesController < ApplicationController
     end
 
     content ||=
-      TranslationCacheMetaDatum.cached_content(locale) ||
+      TranslationCacheMetaDatum[locale].cached_content ||
         { marketentries: [] }
 
     render(

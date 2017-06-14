@@ -26,7 +26,7 @@ class FrontendCacheRebuildJob < ApplicationJob
         meta.update(locked_at: Time.current)
         logger.info "start rebuild of #{locale} cache."
         content = content || TranslationCacheMetaDatum.build_translation_data(locale).to_json
-        TranslationCacheMetaDatum.write_cache_file(locale, content)
+        meta.write_cache_file(content)
         logger.info "finished rebuild of #{locale} cache."
         meta.update(locked_at: nil, updated_at: Time.current)
       end

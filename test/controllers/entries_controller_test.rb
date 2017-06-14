@@ -37,4 +37,33 @@ class EntriesControllerTest < ActionController::TestCase
     end
   end
 
+  test 'do not cache index result if cache valid' do
+    FrontendCacheRebuildJob.perform_now('de')
+
+    assert TranslationCacheMetaDatum['de'].cache_valid?
+
+    assert_no_difference -> { Dir.glob(File.join(TranslationCacheMetaDatum::CACHE_PATH, '*')).count } do
+      get :index, params: { locale: 'de' }
+      assert_response :ok
+    end
+  end
+
+  test 'cache index result if cache invalid' do
+    FrontendCacheRebuildJob.perform_now('de')
+
+    TranslationCacheMetaDatum.any_instance.stubs(:cache_valid?).returns(false)
+
+    path = TranslationCacheMetaDatum['de'].cache_file_path
+    backup_path = "#{path}.bak"
+    FileUtils.copy(path, "#{path}.bak")
+    assert_not FileUtils.uptodate?(path, [backup_path])
+
+    assert_no_difference -> { Dir.glob(File.join(TranslationCacheMetaDatum::CACHE_PATH, '*')).count } do
+      get :index, params: { locale: 'de' }
+      assert_response :ok
+    end
+
+    assert FileUtils.uptodate?(path, [backup_path])
+  end
+
 end

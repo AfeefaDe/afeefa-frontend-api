@@ -4,34 +4,25 @@ class TranslationCacheMetaDatum < ApplicationRecord
   SUPPORTED_LOCALES = %w(ar de en es fa fr ku ps ru sq sr ti tr ur)
   CACHE_PATH = Rails.root.join('public', 'cache').to_s
 
-  def cache_valid?
-    timestamp = TranslationCache.where(language: locale).maximum(:updated_at)
-    timestamp.present? && updated_at.present? && timestamp <= updated_at
-  end
-
   def self.[](locale)
     find_by(locale: locale)
   end
 
-  def self.cache_file_path(locale)
+  def cache_file_path
     File.join(CACHE_PATH, "#{locale}.json").to_s
   end
 
-  def self.cached_json(locale)
-    file = cache_file_path(locale)
+  def cached_json
+    file = cache_file_path
     if File.exists?(file)
       File.read(file)
     end
   end
 
-  def self.cached_content(locale)
-    if json = cached_json(locale)
+  def cached_content
+    if json = cached_json
       JSON.parse(json)
     end
-  end
-
-  def self.cache_valid?(locale)
-    (meta = TranslationCacheMetaDatum.find_by(locale: locale)) && meta.cache_valid?
   end
 
   def self.build_translation_data(locale)
@@ -52,12 +43,17 @@ class TranslationCacheMetaDatum < ApplicationRecord
     { marketentries: orgas + events }
   end
 
-  def self.write_cache_file(locale, content)
+  def write_cache_file(content)
     FileUtils.mkdir_p(CACHE_PATH)
     target = File.join(CACHE_PATH, "#{locale}.json")
     File.open(target, 'w') do |f|
       f.write(content)
     end
+  end
+
+  def cache_valid?
+    timestamp = TranslationCache.where(language: locale).maximum(:updated_at)
+    timestamp.present? && updated_at.present? && timestamp <= updated_at
   end
 
   private
