@@ -42,6 +42,13 @@ class EntriesControllerTest < ActionController::TestCase
     assert @event.key?('timeTo')
   end
 
+  test 'fail for unsupported locale' do
+    exception = assert_raise do
+      get :index, params: { locale: 'foo' }
+    end
+    assert_equal 'locale is not supported', exception.message
+  end
+
   test 'cache index result' do
     assert_difference -> { Dir.glob(File.join(TranslationCacheMetaDatum::CACHE_PATH, '*')).count } do
       get :index, params: { locale: 'de' }
