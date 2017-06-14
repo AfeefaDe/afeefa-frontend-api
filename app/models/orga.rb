@@ -15,10 +15,12 @@ class Orga < ApplicationRecord
 
   # CLASS METHODS
   class << self
-    @@root_orga = Orga.unscoped.find_by_title(ROOT_ORGA_TITLE)
-
     def is_root_orga?(orga_id)
-      orga_id == @@root_orga.id
+      orga_id == root_orga.id
+    end
+
+    def root_orga
+      @@root_orga ||= Orga.unscoped.find_by_title(ROOT_ORGA_TITLE)
     end
   end
 
