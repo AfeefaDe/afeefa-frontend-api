@@ -60,7 +60,7 @@ module Entry
             pp parent_attribute
             pp self.send(attribute)
             self.send("#{attribute}=",
-              [parent_attribute, self.send(attribute)].join("\n\n"))
+                [parent_attribute, self.send(attribute)].join("\n\n"))
           end
         end
       end
@@ -84,6 +84,12 @@ module Entry
           end
         else
           contact = parent_orga.contact_infos.first
+          self.phone = contact.phone
+          self.mail = contact.mail
+          self.social_media = contact.social_media
+          self.web = contact.web
+          self.contact_person = contact.contact_person
+          self.spoken_languages = contact.spoken_languages
         end
       end
 
