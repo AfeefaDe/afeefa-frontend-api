@@ -6,6 +6,8 @@ module Entry
     belongs_to :category, optional: true
     belongs_to :sub_category, class_name: 'Category', optional: true
 
+    belongs_to :parent_orga, class_name: 'Orga', foreign_key: 'parent_orga_id'
+
     has_many :locations, as: :locatable
     has_many :contact_infos, as: :contactable
     has_many :translation_caches, as: :cacheable, dependent: :destroy, class_name: 'TranslationCache'
@@ -16,6 +18,7 @@ module Entry
   def as_json(*args)
     location = self.locations.first
     contact = self.contact_infos.first
+    parent_orga = self.parent_orga
 
     trans_title, trans_description, trans_short_description = nil
 
@@ -41,11 +44,21 @@ module Entry
       locations: inheritance.include?('locations')
     }
 
-    if parent_orga
+    if contact
+      self.phone = contact.phone
+      self.mail = contact.mail
+      self.social_media = contact.social_media
+      self.web = contact.web
+      self.contact_person = contact.contact_person
+      self.spoken_languages = contact.spoken_languages
+    end
 
+    if parent_orga
       [:short_description].each do |attribute|
-        if inheritance.include?('short_description')
+        if self.inheritance and self.inheritance.include?('short_description')
           if (parent_attribute = parent_orga.send(attribute))
+            pp parent_attribute
+            pp self.send(attribute)
             self.send("#{attribute}=",
               [parent_attribute, self.send(attribute)].join("\n\n"))
           end
@@ -60,29 +73,20 @@ module Entry
         end
       end
 
-      if parent_orga.contact
+      if parent_orga.contact_infos.first
         if contact
-          contact.attributes.keys.each do |attribute|
+          [:mail, :phone, :contact_person, :web, :social_media, :spoken_languages].each do |attribute|
             if send(attribute).blank?
-              if (parent_attribute = parent_orga.contact.send(attribute))
+              if (parent_attribute = parent_orga.contact_infos.first.send(attribute))
                 self.send("#{attribute}=", parent_attribute)
               end
             end
           end
         else
-          contact = parent_orga.contact
+          contact = parent_orga.contact_infos.first
         end
       end
 
-    end
-
-    if contact
-      self.phone = contact.phone
-      self.mail = contact.mail
-      self.social_media = contact.social_media
-      self.web = contact.web
-      self.contact_person = contact.contact_person
-      self.spoken_languages = contact.spoken_languages
     end
 
     {
