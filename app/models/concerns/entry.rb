@@ -57,8 +57,6 @@ module Entry
       [:short_description].each do |attribute|
         if self.inheritance and self.inheritance.include?('short_description')
           if (parent_attribute = parent_orga.send(attribute))
-            pp parent_attribute
-            pp self.send(attribute)
             self.send("#{attribute}=",
                 [parent_attribute, self.send(attribute)].join("\n\n"))
           end
