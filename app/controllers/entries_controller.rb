@@ -30,7 +30,7 @@ class EntriesController < ApplicationController
   def get_entries(klazz, with_translations: false)
     entries =
         klazz.
-            includes(:category, :sub_category, :locations, :contact_infos).
+            includes(:category, :sub_category, :locations, :contact_infos, :parent_orga, parent_orga: :contact_infos).
             where(state: 'active')
     if with_translations
       entries = entries.includes(:translation_caches)

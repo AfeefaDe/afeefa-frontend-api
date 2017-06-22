@@ -31,6 +31,8 @@ end
 group :development, :test do
   # Call 'byebug' anywhere in the code to stop execution and get a debugger console
   gem 'byebug', platform: :mri
+  gem 'ruby-debug-ide'
+  gem 'debase'
 end
 
 group :development do
