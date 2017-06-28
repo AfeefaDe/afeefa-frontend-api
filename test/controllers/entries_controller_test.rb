@@ -12,12 +12,12 @@ class EntriesControllerTest < ActionController::TestCase
     event2 = Event.new(state: :active, date_start: 5.days.from_now)
     event2.save!(validate: false)
 
-    get :index, params: { locale: 'de' }
+    get :index, params: {locale: 'de'}
     json = JSON.parse(response.body)
     assert_response :ok
 
     json = JSON.parse(response.body)
-    assert_equal 4, json['marketentries'].size
+    assert_equal 3, json['marketentries'].size
     assert @event = json['marketentries'].last
     assert @event.key?('dateFrom')
     assert @event.key?('timeFrom')
@@ -27,14 +27,14 @@ class EntriesControllerTest < ActionController::TestCase
 
   test 'fail for unsupported locale' do
     exception = assert_raise do
-      get :index, params: { locale: 'foo' }
+      get :index, params: {locale: 'foo'}
     end
     assert_equal 'locale is not supported', exception.message
   end
 
   test 'cache index result' do
-    assert_difference -> { Dir.glob(File.join(TranslationCacheMetaDatum::CACHE_PATH, '*')).count } do
-      get :index, params: { locale: 'de' }
+    assert_difference -> {Dir.glob(File.join(TranslationCacheMetaDatum::CACHE_PATH, '*')).count} do
+      get :index, params: {locale: 'de'}
       assert_response :ok
     end
   end
