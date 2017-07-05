@@ -58,6 +58,9 @@ GEM
       capistrano (~> 3.1)
       capistrano-bundler (~> 1.1)
     concurrent-ruby (1.0.5)
+    debase (0.2.1)
+      debase-ruby_core_source
+    debase-ruby_core_source (0.9.9)
     erubis (2.7.0)
     ffi (1.9.18)
     globalid (0.4.0)
@@ -126,6 +129,8 @@ GEM
     rb-fsevent (0.9.8)
     rb-inotify (0.9.8)
       ffi (>= 0.5.0)
+    ruby-debug-ide (0.6.0)
+      rake (>= 0.8.1)
     ruby-progressbar (1.8.1)
     spring (2.0.1)
       activesupport (>= 4.2)
@@ -161,12 +166,14 @@ PLATFORMS
 DEPENDENCIES
   byebug
   capistrano-rails
+  debase
   listen (~> 3.0.5)
   minitest-rails
   minitest-reporters
   mocha
   mysql2
   rails (~> 5.0.2)
+  ruby-debug-ide
   spring
   spring-watcher-listen (~> 2.0.0)
   sqlite3

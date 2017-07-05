@@ -37,4 +37,17 @@ class EntriesController < ApplicationController
       language: locale || TranslationCacheMetaDatum::DEFAULT_LOCALE
     )
   end
+
+  private
+
+  def get_entries(klazz, with_translations: false)
+    entries =
+        klazz.
+            includes(:category, :sub_category, :locations, :contact_infos, :parent_orga).
+            where(state: 'active')
+    if with_translations
+      entries = entries.includes(:translation_caches)
+    end
+    entries
+  end
 end
