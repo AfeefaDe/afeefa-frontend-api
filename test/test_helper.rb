@@ -24,7 +24,7 @@ class ActiveSupport::TestCase
   def init_translation_cache(locale)
     assert TranslationCache.where(language: locale).delete_all
 
-    orga = Orga.new(state: :active)
+    orga = Orga.new(state: :active, parent_orga: Orga.root_orga)
     assert orga.save, orga.errors.messages
     translation = TranslationCache.new(language: locale, cacheable: orga)
     assert translation.save, translation.errors.messages
