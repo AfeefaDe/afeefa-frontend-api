@@ -33,6 +33,7 @@ group :development, :test do
   gem 'byebug', platform: :mri
   gem 'ruby-debug-ide'
   gem 'debase'
+  gem 'rack-cors'
 end
 
 group :development do
