@@ -102,7 +102,6 @@ module Entry
       descriptionShort: trans_short_description || self.short_description,
       entryId: self.legacy_entry_id,
       facebook: self.social_media || '',
-      forChildren: self.for_children,
       image: self.media_url,
       imageType: self.media_type,
       location: self.locations,
