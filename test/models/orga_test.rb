@@ -7,6 +7,7 @@ class OrgaTest < ActiveSupport::TestCase
     assert orga = Orga.create(tags: tags)
     json = JSON.parse(orga.to_json)
     assert_equal tags, json['tags']
+    assert json.key?('supportWantedDetail')
   end
 
 end

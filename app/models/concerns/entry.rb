@@ -113,6 +113,7 @@ module Entry
       spokenLanguages: self.spoken_languages || '',
       subCategory: self.sub_category ? self.sub_category.title : '',
       supportWanted: self.support_wanted,
+      supportWantedDetail: self.support_wanted_detail,
       tags: self.tags || '',
       type: self.type,
       web: self.web || '',
