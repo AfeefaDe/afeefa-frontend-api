@@ -1,7 +1,7 @@
 Rails.application.routes.draw do
 
-  resources :entries, only: :create
-
-  get '/api/marketentries', to: 'entries#index'
+  namespace :api do
+    resources :entries, only: %i(index create), path: 'marketentries'
+  end
 
 end
