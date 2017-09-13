@@ -10,8 +10,11 @@ class Orga < ApplicationRecord
 
   after_initialize do |entry|
     entry.type = 0
-    entry.entryType = 'orga'
+    entry.entry_type = 'orga'
   end
+
+  # VALIDATIONS
+  validates_uniqueness_of :title
 
   # CLASS METHODS
   class << self

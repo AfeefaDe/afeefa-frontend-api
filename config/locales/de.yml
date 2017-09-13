@@ -1,0 +1,55 @@
+de:
+  errors:
+    messages:
+      blank: fehlt
+      empty: fehlt
+      required: fehlt
+      too_long:
+        one: ist zu lang
+        other: ist zu lang
+      taken: ist bereits vergeben
+  api:
+    attributes: &attributes
+      orga: Organisation
+      event: Veranstaltung
+      category: Hauptkategorie
+      sub_category: Unterkategorie
+      location: Ort
+      locations: Ortsangaben
+      contact_info: Kontaktinformation
+      contact_infos: Kontaktinformationen
+      title: Titel
+      description: Beschreibung
+      short_description: Kurzbeschreibung
+      opening_hours: Öffnungszeiten
+      directions: Anfahrtsbeschreibung
+      date: Datum
+      date_start: Start-Datum
+      date_end: End-Datum
+      creator: Autor
+      contact_person: Kontaktperson
+      phone: Telefon
+      mail: E-Mail-Adresse
+      sub_orgas: Unterorganisationen
+      events: Events
+      sub_events: Unterevents
+  activerecord:
+    attributes:
+      orga:
+        <<: *attributes
+      event:
+        <<: *attributes
+      contact_info:
+        <<: *attributes
+    errors:
+      models:
+        orga:
+          attributes:
+            sub_orgas: &errors
+              not_blank: müssen gelöscht werden
+            events:
+              <<: *errors
+        event:
+          attributes:
+            sub_events:
+              <<: *errors

@@ -6,7 +6,7 @@ class Event < ApplicationRecord
 
   after_initialize do |entry|
     entry.type = 2
-    entry.entryType = 'event'
+    entry.entry_type = 'event'
   end
 
   scope :upcoming, -> {

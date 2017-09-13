@@ -6,13 +6,13 @@ module Entry
     belongs_to :category, optional: true
     belongs_to :sub_category, class_name: 'Category', optional: true
 
-    belongs_to :parent_orga, class_name: 'Orga', foreign_key: 'parent_orga_id'
+    belongs_to :parent_orga, class_name: 'Orga', foreign_key: :orga_id
 
     has_many :locations, as: :locatable
     has_many :contact_infos, as: :contactable
     has_many :translation_caches, as: :cacheable, dependent: :destroy, class_name: 'TranslationCache'
 
-    attr_accessor :type, :entryType, :phone, :mail, :social_media, :web, :contact_person, :spoken_languages
+    attr_accessor :type, :entry_type, :phone, :mail, :social_media, :web, :contact_person, :spoken_languages
   end
 
   def as_json(*args)

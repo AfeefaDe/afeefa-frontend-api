@@ -35,6 +35,19 @@ group :development, :test do
   gem 'byebug', platform: :mri
   gem 'ruby-debug-ide'
   gem 'debase'
+
+  # test framework
+  gem 'minitest-rails'
+  gem 'minitest-reporters'
+
+  # for tests
+  gem 'mocha'
+
+  gem 'rails_best_practices'
+  gem 'bullet'
+
+  # code coverage
+  gem 'simplecov', require: false
 end
 
 group :development do
