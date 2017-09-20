@@ -1,13 +1,8 @@
 class Event < ApplicationRecord
+
   include Entry
 
   belongs_to :parent_orga, class_name: 'Orga', foreign_key: 'orga_id'
-
-
-  after_initialize do |entry|
-    entry.type = 2
-    entry.entry_type = 'event'
-  end
 
   scope :upcoming, -> {
     now = Time.now.beginning_of_day
@@ -17,6 +12,11 @@ class Event < ApplicationRecord
     or(where('date_end >= ?', now))
   }
   default_scope { upcoming }
+
+  after_initialize do |entry|
+    entry.type = 2
+    entry.entry_type = 'Event'
+  end
 
   def as_json(*args)
     json = super

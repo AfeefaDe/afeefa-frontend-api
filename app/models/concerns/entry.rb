@@ -6,7 +6,7 @@ module Entry
     belongs_to :category, optional: true
     belongs_to :sub_category, class_name: 'Category', optional: true
 
-    belongs_to :parent_orga, class_name: 'Orga', foreign_key: :orga_id
+    # belongs_to :parent_orga, class_name: 'Orga', foreign_key: :orga_id
 
     has_many :locations, as: :locatable
     has_many :contact_infos, as: :contactable

@@ -3,7 +3,7 @@ require 'test_helper'
 class EntriesControllerTest < ActionController::TestCase
 
   setup do
-    orga = Orga.new(state: :active)
+    orga = Orga.new(state: :active, title: 'orga xyz')
     assert orga.save(validate: false)
     @event = Event.new(state: :active, date_start: 5.days.from_now)
     assert @event.save(validate: false)

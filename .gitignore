@@ -24,3 +24,7 @@
 
 .idea
 .vscode
+
+# Coverage
+/coverage
+/test/coverage
