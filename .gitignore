@@ -28,3 +28,6 @@
 # Coverage
 /coverage
 /test/coverage
+
+# cached files
+/public/cache

@@ -22,18 +22,23 @@ module Entry
 
     trans_title, trans_description, trans_short_description = nil
 
-    if args[0][:language] != TranslationCacheMetaDatum::DEFAULT_LOCALE
-      self.translation_caches.each do |t|
-        if t.language == args[0][:language]
-          trans_title = t[:title]
-          trans_description = t[:description]
-          trans_short_description = t[:short_description]
-          break
+    locale = args[0][:language]
+    if locale != TranslationCacheMetaDatum::DEFAULT_LOCALE
+      if translation_caches.any?
+        translation_caches.each do |translation_cache|
+          if translation_cache.language == args[0][:language]
+            trans_title = translation_cache[:title]
+            trans_description = translation_cache[:description]
+            trans_short_description = translation_cache[:short_description]
+            break
+          end
         end
+      else
+        Rails.logger.warn "no translations found for locale #{locale}"
       end
     end
 
-    if location and contact
+    if location && contact
       location.openingHours = contact.opening_hours
     end
 
@@ -55,10 +60,10 @@ module Entry
 
     if parent_orga
       [:short_description].each do |attribute|
-        if self.inheritance and self.inheritance.include?('short_description')
+        if self.inheritance && self.inheritance.include?('short_description')
           if (parent_attribute = parent_orga.send(attribute))
             self.send("#{attribute}=",
-                [parent_attribute, self.send(attribute)].join("\n\n"))
+              [parent_attribute, self.send(attribute)].join("\n\n"))
           end
         end
       end
