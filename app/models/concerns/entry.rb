@@ -95,7 +95,7 @@ module Entry
 
     {
       id: self.id,
-      entryType: self.entryType,
+      entryType: self.entry_type,
       category: self.category,
       certified: self.certified_sfr,
       description: trans_description || self.description,
