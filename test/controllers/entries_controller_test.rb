@@ -11,11 +11,15 @@ class EntriesControllerTest < ActionController::TestCase
     assert location.save(validate: false)
     event2 = Event.new(state: :active, date_start: 5.days.from_now)
     assert event2.save(validate: false)
+    Orga.update_all(area: 'dresden')
+    Event.update_all(area: 'dresden')
 
     FileUtils.rm_rf(TranslationCacheMetaDatum::CACHE_PATH)
     TranslationCacheMetaDatum.delete_all
 
-    init_translation_cache('de')
+    Timecop.travel 1.second.ago do
+      init_translation_cache('en')
+    end
   end
 
   test 'get index' do
@@ -42,11 +46,22 @@ class EntriesControllerTest < ActionController::TestCase
     assert @event.key?('timeTo')
   end
 
-  test 'fail for unsupported locale' do
-    exception = assert_raise do
-      get :index, params: { locale: 'foo' }
-    end
-    assert_equal 'locale is not supported', exception.message
+  test 'get en' do
+    get :index, params: { locale: 'en' }
+    assert_response :ok
+    json = JSON.parse(response.body)
+    assert_equal 4, json['marketentries'].size
+    assert @event = json['marketentries'].last
+    assert @event.key?('dateFrom')
+    assert @event.key?('timeFrom')
+    assert @event.key?('dateTo')
+    assert @event.key?('timeTo')
+  end
+
+  test 'handle unsupported locale' do
+    get :index, params: { locale: 'foo' }
+    assert_response :bad_request
+    assert_equal 'locale foo is not supported yet.', response.body
   end
 
   test 'cache index result' do
@@ -57,9 +72,10 @@ class EntriesControllerTest < ActionController::TestCase
   end
 
   test 'do not cache index result if cache valid' do
-    FrontendCacheRebuildJob.perform_now('de')
+    FrontendCacheRebuildJob.perform_now('de', 'dresden')
 
-    assert TranslationCacheMetaDatum['de'].cache_valid?
+    assert TranslationCacheMetaDatum['de', 'dresden'].cache_valid?,
+      cache_validation_output(TranslationCacheMetaDatum['de', 'dresden'])
 
     assert_no_difference -> { Dir.glob(File.join(TranslationCacheMetaDatum::CACHE_PATH, '*')).count } do
       get :index, params: { locale: 'de' }
@@ -68,11 +84,11 @@ class EntriesControllerTest < ActionController::TestCase
   end
 
   test 'cache index result if cache invalid' do
-    FrontendCacheRebuildJob.perform_now('de')
+    FrontendCacheRebuildJob.perform_now('de', 'dresden')
 
     TranslationCacheMetaDatum.any_instance.stubs(:cache_valid?).returns(false)
 
-    path = TranslationCacheMetaDatum['de'].cache_file_path
+    path = TranslationCacheMetaDatum['de', 'dresden'].cache_file_path
     backup_path = "#{path}.bak"
     FileUtils.copy(path, "#{path}.bak")
     assert_not FileUtils.uptodate?(path, [backup_path])

@@ -10,22 +10,20 @@ class FrontendCacheRebuildJob < ApplicationJob
       end
   end
 
-  def perform(locale, content: nil)
+  def perform(locale, area)
     TranslationCacheMetaDatum.transaction do
       meta = TranslationCacheMetaDatum.find_or_create_by(locale: locale)
-
       unless meta
         logger.info "#{locale} is not supported yet."
         return
       end
-
       if meta.locked_at?
         logger.info "#{locale} cache is already in progress, so skip this job."
         return
       else
         meta.update(locked_at: Time.current)
         logger.info "start rebuild of #{locale} cache."
-        content = content || TranslationCacheMetaDatum.build_translation_data(locale).to_json
+        content = TranslationCacheMetaDatum.build_translation_data(locale, area).to_json
         meta.write_cache_file(content)
         logger.info "finished rebuild of #{locale} cache."
         meta.update(locked_at: nil, updated_at: Time.current)

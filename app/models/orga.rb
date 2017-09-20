@@ -7,7 +7,7 @@ class Orga < ApplicationRecord
   belongs_to :parent_orga, class_name: 'Orga', foreign_key: 'parent_orga_id'
 
   scope :without_root, -> {
-    where(title: nil).or(where.not(title: ROOT_ORGA_TITLE))
+    where.not(title: ROOT_ORGA_TITLE)
   }
   default_scope { without_root }
 

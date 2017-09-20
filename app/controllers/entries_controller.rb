@@ -1,24 +1,20 @@
 class EntriesController < ApplicationController
 
-  DEFAULT_LOCALE = 'de'
-  SUPPORTED_LOCALES = %w(ar en es fa fr ku ps ru sq sr ti tr ur)
-
   def index
-    area = if params['area'].present? && ['leipzig', 'bautzen'].include?(params['area']) then params['area'] else 'dresden' end
-
-    if !params['locale'].present? || (params['locale'].present? && params['locale'] == DEFAULT_LOCALE)
-      orgas = get_entries(Orga, area)
-      events = get_entries(Event, area)
-    else
-      if params['locale'].in?(SUPPORTED_LOCALES)
-        orgas = get_entries(Orga, area, with_translations: true)
-        events = get_entries(Event, area, with_translations: true)
+    area =
+      if params['area'].present? && ['leipzig', 'bautzen'].include?(params['area'])
+        params['area']
       else
-        raise 'locale is not supported'
+        'dresden'
       end
-    end
 
-    render_data(locale)
+    locale = params['locale'].presence || TranslationCacheMetaDatum::DEFAULT_LOCALE
+
+    if locale.in?(TranslationCacheMetaDatum::SUPPORTED_LOCALES)
+      render_data(locale, area)
+    else
+      render plain: "locale #{locale} is not supported yet.", status: :bad_request
+    end
   end
 
   def create
@@ -64,18 +60,6 @@ class EntriesController < ApplicationController
 
   private
 
-  def get_entries(klazz, area, with_translations: false)
-    entries =
-        klazz.
-            includes(:category, :sub_category, :locations, :contact_infos, :parent_orga, parent_orga: :contact_infos).
-            where(state: 'active').
-            where(area: area)
-    if with_translations
-      entries = entries.includes(:translation_caches)
-    end
-    entries
-  end
-
   def orga_params
     params.permit(:title)
   end
@@ -84,30 +68,20 @@ class EntriesController < ApplicationController
     params.permit(:title, :date_start, :date_end)
   end
 
-  def render_data(locale)
+  def render_data(locale, area)
+    use_cache = false
     meta = TranslationCacheMetaDatum.find_by(locale: locale)
-    if meta && meta.updated_at > 10.minutes.ago && !params[:force_refresh]
-      unless meta.cache_valid?
-        if Rails.env.test?
-          FrontendCacheRebuildJob.perform_now(locale)
-        else
-          FrontendCacheRebuildJob.perform_later(locale)
-        end
-      end
-    else
-      content = TranslationCacheMetaDatum.build_translation_data(locale).to_json
-      FrontendCacheRebuildJob.perform_now(locale, content: content)
+    if meta && !params[:force_refresh] && meta.cache_valid?
+      use_cache = true
     end
-
-    content ||=
-      TranslationCacheMetaDatum[locale].cached_content ||
-        { marketentries: [] }
-
-    render(
-      json: content,
-      status: :ok,
-      language: locale || TranslationCacheMetaDatum::DEFAULT_LOCALE
-    )
+    FrontendCacheRebuildJob.perform_now(locale, area) unless use_cache
+    meta = TranslationCacheMetaDatum.find_by(locale: locale)
+    send_file meta.cache_file_path, type: 'application/json', disposition: 'inline'
+    # render(
+    #   json: content,
+    #   status: :ok,
+    #   language: locale || TranslationCacheMetaDatum::DEFAULT_LOCALE
+    # )
   end
 
 end

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20170913131456) do
+ActiveRecord::Schema.define(version: 20170920100635) do
 
   create_table "annotation_categories", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
     t.string   "title",               limit: 1000
@@ -186,8 +186,9 @@ ActiveRecord::Schema.define(version: 20170913131456) do
   create_table "translation_cache_meta_data", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
     t.string   "locale"
     t.datetime "locked_at"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
+    t.datetime "created_at",                     null: false
+    t.datetime "updated_at",                     null: false
+    t.string   "area",       default: "dresden"
   end
 
   create_table "translation_caches", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
