@@ -1,7 +1,7 @@
 class TranslationCacheMetaDatum < ApplicationRecord
 
   DEFAULT_LOCALE = 'de'
-  SUPPORTED_LOCALES = %w(ar de en *es fa fr ku ps ru sq sr ti tr ur)
+  SUPPORTED_LOCALES = %w(ar de en es fa fr ku ps ru sq sr ti tr ur)
   CACHE_PATH = Rails.root.join('public', 'cache').to_s
 
   def self.[](locale, area)

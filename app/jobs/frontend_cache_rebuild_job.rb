@@ -12,7 +12,7 @@ class FrontendCacheRebuildJob < ApplicationJob
 
   def perform(locale, area)
     TranslationCacheMetaDatum.transaction do
-      meta = TranslationCacheMetaDatum.find_or_create_by(locale: locale)
+      meta = TranslationCacheMetaDatum.find_or_create_by(locale: locale, area: area)
       unless meta
         logger.info "#{locale} is not supported yet."
         return
