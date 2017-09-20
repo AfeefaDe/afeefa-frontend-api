@@ -85,4 +85,89 @@ class EntriesControllerTest < ActionController::TestCase
     assert FileUtils.uptodate?(path, [backup_path])
   end
 
+  test 'should create orga' do
+    orga_params = { type: 'orga', title: 'special new orga' }
+
+    assert_difference -> { Orga.count } do
+      assert_no_difference -> { Orga.where(state: :active).count } do
+        post :create, params: orga_params
+        assert_response :created
+      end
+    end
+    assert_equal orga_params[:title], Orga.last.title
+    assert_equal 'inactive', Orga.last.state
+
+    Time.freeze do
+      assert_difference -> { Orga.count } do
+        assert_no_difference -> { Orga.where(state: :active).count } do
+          post :create, params: orga_params
+          assert_response :created
+        end
+      end
+      assert_match /\A#{orga_params[:title]}_\d*/, Orga.last.title
+      assert_equal 'inactive', Orga.last.state
+
+      assert_no_difference -> { Orga.count } do
+        assert_no_difference -> { Orga.where(state: :active).count } do
+          post :create, params: orga_params
+          assert_response :unprocessable_entity
+          assert_match 'bereits vergeben', response.body
+        end
+      end
+    end
+
+    Orga.any_instance.stubs(:save).returns(false)
+    assert_no_difference -> { Orga.count } do
+      assert_no_difference -> { Orga.where(state: :active).count } do
+        post :create, params: orga_params
+        assert_response :unprocessable_entity
+        assert_match 'internal error', response.body
+      end
+    end
+  end
+
+  test 'should create event' do
+    event_params = {
+      type: 'event', title: 'special new event',
+      date_start: Time.zone.parse("01.01.#{1.year.from_now.year} 10:00")
+    }
+
+    assert_difference -> { Event.count } do
+      assert_no_difference -> { Event.where(state: :active).count } do
+        post :create, params: event_params
+        assert_response :created
+      end
+    end
+    assert_equal event_params[:title], Event.last.title
+    assert_equal 'inactive', Event.last.state
+
+    Time.freeze do
+      assert_difference -> { Event.count } do
+        assert_no_difference -> { Event.where(state: :active).count } do
+          post :create, params: event_params
+          assert_response :created
+        end
+      end
+      assert_match /\A#{event_params[:title]}_\d*/, Event.last.title
+      assert_equal 'inactive', Event.last.state
+
+      assert_no_difference -> { Event.count } do
+        assert_no_difference -> { Event.where(state: :active).count } do
+          post :create, params: event_params
+          assert_response :unprocessable_entity
+          assert_match 'bereits vergeben', response.body
+        end
+      end
+    end
+
+    Event.any_instance.stubs(:save).returns(false)
+    assert_no_difference -> { Event.count } do
+      assert_no_difference -> { Event.where(state: :active).count } do
+        post :create, params: event_params
+        assert_response :unprocessable_entity
+        assert_match 'internal error', response.body
+      end
+    end
+  end
+
 end

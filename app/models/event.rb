@@ -1,9 +1,12 @@
 class Event < ApplicationRecord
   include Entry
 
+  belongs_to :parent_orga, class_name: 'Orga', foreign_key: 'orga_id'
+
+
   after_initialize do |entry|
     entry.type = 2
-    entry.entryType = 'event'
+    entry.entry_type = 'event'
   end
 
   scope :upcoming, -> {
