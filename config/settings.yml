@@ -1,0 +1,3 @@
+changes:
+  webhook_api_token: <%= ENV["FAPI_CHANGES_WEBHOOK_TOKEN"] %>
+
