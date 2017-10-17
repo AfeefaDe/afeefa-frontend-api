@@ -1,3 +1,5 @@
+require 'cache_builder' #TODO: could vanish any time, may be
+
 class EntriesController < ApplicationController
 
   def index
