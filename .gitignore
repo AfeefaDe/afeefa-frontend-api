@@ -30,4 +30,7 @@
 /test/coverage
 
 # cached files
-/public/cache
+/public/cache/*
+!/public/cache/.keep
+/test/cache/*
+!/test/cache/.keep

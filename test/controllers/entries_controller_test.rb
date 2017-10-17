@@ -3,102 +3,80 @@ require 'test_helper'
 class EntriesControllerTest < ActionController::TestCase
 
   setup do
-    orga = Orga.new(state: :active, title: 'orga xyz')
-    assert orga.save(validate: false)
-    @event = Event.new(state: :active, date_start: 5.days.from_now)
-    assert @event.save(validate: false)
-    location = @event.locations.new
-    assert location.save(validate: false)
-    event2 = Event.new(state: :active, date_start: 5.days.from_now)
-    assert event2.save(validate: false)
-    Orga.update_all(area: 'dresden')
-    Event.update_all(area: 'dresden')
+    orga = create(:orga, title: 'orga.1.title', area: 'dresden', translated_locales: ['en'])
+    @event = create(:event, title: 'event.1.title', area: 'dresden', parent_orga: orga)
+    event2 = create(:event, title: 'event.2.title', area: 'dresden')
+    orga2 = create(:orga, title: 'orga.2.title', area: 'bautzen')
 
-    FileUtils.rm_rf(TranslationCacheMetaDatum::CACHE_PATH)
-    TranslationCacheMetaDatum.delete_all
+    silence_warnings do
+      @old_locales = Translation::TRANSLATABLE_LOCALES
+      Translation.const_set(:TRANSLATABLE_LOCALES, ['en'])
+    end
 
-    Timecop.travel 1.second.ago do
-      init_translation_cache('en')
+    cache_builder = CacheBuilder.new
+    cache_builder.purge
+    cache_builder.build_all
+  end
+
+  teardown do
+    silence_warnings do
+      Translation.const_set(:TRANSLATABLE_LOCALES, @old_locales)
     end
   end
 
-  test 'get index' do
-    get :index, params: { locale: 'de' }
+  test 'should get event' do
+    get :index, params: { area: 'dresden', locale: 'de' }
+    assert_response :ok
+    json = JSON.parse(response.body)
+    assert event = json['marketentries'].last
+    assert event.key?('dateFrom')
+    assert event.key?('timeFrom')
+    assert event.key?('dateTo')
+    assert event.key?('timeTo')
+  end
+
+  test 'should get dresden/de' do
+    get :index, params: { area: 'dresden', locale: 'de' }
     assert_response :ok
     json = JSON.parse(response.body)
     assert_equal 4, json['marketentries'].size
-    assert @event = json['marketentries'].last
-    assert @event.key?('dateFrom')
-    assert @event.key?('timeFrom')
-    assert @event.key?('dateTo')
-    assert @event.key?('timeTo')
+    assert_equal 'orga.1.title', json['marketentries'][0]['name']
+    assert_equal 'event.2.title', json['marketentries'][3]['name']
   end
 
-  test 'get de by default' do
-    get :index, params: { locale: 'de' }
+  test 'should get dresden/de by default' do
+    get :index
     assert_response :ok
     json = JSON.parse(response.body)
     assert_equal 4, json['marketentries'].size
-    assert @event = json['marketentries'].last
-    assert @event.key?('dateFrom')
-    assert @event.key?('timeFrom')
-    assert @event.key?('dateTo')
-    assert @event.key?('timeTo')
+    assert_equal 'orga.1.title', json['marketentries'][0]['name']
+    assert_equal 'event.2.title', json['marketentries'][3]['name']
   end
 
-  test 'get en' do
-    get :index, params: { locale: 'en' }
+  test 'should get dresden/en' do
+    get :index, params: { area: 'dresden', locale: 'en' }
     assert_response :ok
     json = JSON.parse(response.body)
     assert_equal 4, json['marketentries'].size
-    assert @event = json['marketentries'].last
-    assert @event.key?('dateFrom')
-    assert @event.key?('timeFrom')
-    assert @event.key?('dateTo')
-    assert @event.key?('timeTo')
+    assert_equal 'orga.1.title_en', json['marketentries'][0]['name']
+    assert_equal 'event.2.title', json['marketentries'][3]['name']
   end
 
-  test 'handle unsupported locale' do
-    get :index, params: { locale: 'foo' }
-    assert_response :bad_request
-    assert_equal 'locale foo is not supported yet.', response.body
+  test 'should get bautzen' do
+    get :index, params: { area: 'bautzen' }
+    assert_response :ok
+    json = JSON.parse(response.body)
+    assert_equal 1, json['marketentries'].size
+    assert_equal 'orga.2.title', json['marketentries'][0]['name']
   end
 
-  test 'cache index result' do
-    assert_difference -> { Dir.glob(File.join(TranslationCacheMetaDatum::CACHE_PATH, '*')).count } do
-      get :index, params: { locale: 'de' }
-      assert_response :ok
-    end
-  end
-
-  test 'do not cache index result if cache valid' do
-    FrontendCacheRebuildJob.perform_now('de', 'dresden')
-
-    assert TranslationCacheMetaDatum['de', 'dresden'].cache_valid?,
-      cache_validation_output(TranslationCacheMetaDatum['de', 'dresden'])
-
-    assert_no_difference -> { Dir.glob(File.join(TranslationCacheMetaDatum::CACHE_PATH, '*')).count } do
-      get :index, params: { locale: 'de' }
-      assert_response :ok
-    end
-  end
-
-  test 'cache index result if cache invalid' do
-    FrontendCacheRebuildJob.perform_now('de', 'dresden')
-
-    TranslationCacheMetaDatum.any_instance.stubs(:cache_valid?).returns(false)
-
-    path = TranslationCacheMetaDatum['de', 'dresden'].cache_file_path
-    backup_path = "#{path}.bak"
-    FileUtils.copy(path, "#{path}.bak")
-    assert_not FileUtils.uptodate?(path, [backup_path])
-
-    assert_no_difference -> { Dir.glob(File.join(TranslationCacheMetaDatum::CACHE_PATH, '*')).count } do
-      get :index, params: { locale: 'de' }
-      assert_response :ok
-    end
-
-    assert FileUtils.uptodate?(path, [backup_path])
+  test 'should fallback to dresden/de' do
+    get :index, params: { area: 'frauenthal', locale: 'foo' }
+    assert_response :ok
+    json = JSON.parse(response.body)
+    assert_equal 4, json['marketentries'].size
+    assert_equal 'orga.1.title', json['marketentries'][0]['name']
+    assert_equal 'event.2.title', json['marketentries'][3]['name']
   end
 
   test 'should create orga' do

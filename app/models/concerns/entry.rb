@@ -6,8 +6,6 @@ module Entry
     belongs_to :category, optional: true
     belongs_to :sub_category, class_name: 'Category', optional: true
 
-    # belongs_to :parent_orga, class_name: 'Orga', foreign_key: :orga_id
-
     has_many :locations, as: :locatable
     has_many :contact_infos, as: :contactable
     has_many :translation_caches, as: :cacheable, dependent: :destroy, class_name: 'TranslationCache'
@@ -23,7 +21,7 @@ module Entry
     trans_title, trans_description, trans_short_description = nil
 
     locale = args[0][:language]
-    if locale != TranslationCacheMetaDatum::DEFAULT_LOCALE
+    if locale != Translation::DEFAULT_LOCALE
       if translation_caches.any?
         translation_caches.each do |translation_cache|
           if translation_cache.language == args[0][:language]
@@ -34,7 +32,7 @@ module Entry
           end
         end
       else
-        Rails.logger.warn "no translations found for locale #{locale}"
+        Rails.logger.warn "no translations found for #{entry_type} #{id} locale #{locale}"
       end
     end
 

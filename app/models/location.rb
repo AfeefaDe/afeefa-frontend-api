@@ -1,6 +1,6 @@
 class Location < ApplicationRecord
 
-  belongs_to :locateable, polymorphic: true
+  belongs_to :locatable, polymorphic: true
 
   attr_accessor :openingHours
 

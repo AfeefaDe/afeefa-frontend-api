@@ -3,7 +3,9 @@ class ChangeController < ApplicationController
   before_action :ensure_token
 
   def update
-    render json: { token: Settings.changes.webhook_api_token }
+    permitted_params = params.permit(:type, :id, :locale, :deleted, :area)
+    FrontendCacheRebuildJob.perform_later(permitted_params.to_h)
+    render json: { status: 'ok' }, status: :ok
   end
 
   private

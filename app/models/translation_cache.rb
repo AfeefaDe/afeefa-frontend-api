@@ -1,7 +1,6 @@
 class TranslationCache < ApplicationRecord
 
   belongs_to :cacheable, polymorphic: true
-  attr_accessor :title, :description, :short_description
 
   scope :with_orgas, -> {
     joins("LEFT JOIN orgas \

@@ -1,33 +1,32 @@
 class FrontendCacheRebuildJob < ApplicationJob
   queue_as :default
 
-  def logger
-    @logger ||=
-      if log_file = Rails.root.join('log', "#{self.class.to_s.underscore}.log")
-        Logger.new(log_file)
-      else
-        Rails.logger
-      end
-  end
+  def perform(params)
+    # translate an entry
+    if params[:type].present? && params[:id].present? && params[:locale].present? && params[:deleted].blank?
+      cache_builder.translate_entry(params[:type], params[:id], params[:locale])
+    end
 
-  def perform(locale, area)
-    TranslationCacheMetaDatum.transaction do
-      meta = TranslationCacheMetaDatum.find_or_create_by(locale: locale, area: area)
-      unless meta
-        logger.info "#{locale} is not supported yet."
-        return
-      end
-      if meta.locked_at?
-        logger.info "#{locale} cache is already in progress, so skip this job."
-        return
-      else
-        meta.update(locked_at: Time.current)
-        logger.info "start rebuild of #{locale} cache."
-        content = TranslationCacheMetaDatum.build_translation_data(locale, area).to_json(language: locale)
-        meta.write_cache_file(content)
-        logger.info "finished rebuild of #{locale} cache."
-        meta.update(locked_at: nil, updated_at: Time.current)
-      end
+    # update an entry
+    if params[:type].present? && params[:id].present? && params[:locale].blank? && params[:deleted].blank?
+      cache_builder.update_entry(params[:type], params[:id])
+    end
+
+    # remove an entry
+    if params[:area].present? && params[:type].present? && params[:id].present? && params[:locale].blank? && params[:deleted].present?
+      cache_builder.remove_entry(params[:area], params[:type], params[:id])
+    end
+
+    # rebuild entire cache
+    if params[:type].blank? && params[:id].blank? && params[:locale].blank? && params[:deleted].blank?
+      cache_builder.build_all
     end
   end
+
+  private
+
+  def cache_builder
+    @cache_builder ||= CacheBuilder.new
+  end
+
 end

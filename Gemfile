@@ -49,6 +49,7 @@ group :development, :test do
 
   gem 'rails_best_practices'
   gem 'bullet'
+  gem 'factory_girl_rails'
 
   # code coverage
   gem 'simplecov', require: false

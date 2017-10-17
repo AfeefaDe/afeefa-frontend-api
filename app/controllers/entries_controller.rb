@@ -8,27 +8,28 @@ class EntriesController < ApplicationController
         'dresden'
       end
 
-    locale = params['locale'].presence || TranslationCacheMetaDatum::DEFAULT_LOCALE
+    locale =
+      if params['locale'].present? && Translation::TRANSLATABLE_LOCALES.include?(params['locale'])
+        params['locale']
+      else
+        Translation::DEFAULT_LOCALE
+      end
 
-    if locale.in?(TranslationCacheMetaDatum::SUPPORTED_LOCALES)
-      render_data(locale, area)
-    else
-      render plain: "locale #{locale} is not supported yet.", status: :bad_request
-    end
+    render_data(locale, area)
   end
 
   def create
     model = nil
 
     case params[:type].to_s
-    when 'orga'
-      model = Orga.new(orga_params)
-    when 'event'
-      model = Event.new(event_params)
-    else
-      render plain: 'only orgas and events are supported', status: :unprocessable_entity
-      # prevent double rendering
-      return
+      when 'orga'
+        model = Orga.new(orga_params)
+      when 'event'
+        model = Event.new(event_params)
+      else
+        render plain: 'only orgas and events are supported', status: :unprocessable_entity
+        # prevent double rendering
+        return
     end
 
     model.parent_orga = Orga.root_orga
@@ -69,19 +70,8 @@ class EntriesController < ApplicationController
   end
 
   def render_data(locale, area)
-    use_cache = false
-    meta = TranslationCacheMetaDatum.find_by(locale: locale)
-    if meta && !params[:force_refresh] && meta.cache_valid?
-      use_cache = true
-    end
-    FrontendCacheRebuildJob.perform_now(locale, area) unless use_cache
-    meta = TranslationCacheMetaDatum.find_by(locale: locale)
-    send_file meta.cache_file_path, type: 'application/json', disposition: 'inline'
-    # render(
-    #   json: content,
-    #   status: :ok,
-    #   language: locale || TranslationCacheMetaDatum::DEFAULT_LOCALE
-    # )
+    cache_file_path = File.join(CacheBuilder::CACHE_PATH, "#{area}-#{locale}.json").to_s
+    send_file cache_file_path, type: 'application/json', disposition: 'inline'
   end
 
 end
