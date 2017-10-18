@@ -61,7 +61,7 @@ group :development do
   gem 'spring'
   gem 'spring-watcher-listen', '~> 2.0.0'
   # Use Capistrano for deployment
-  gem 'capistrano-rails'
+  gem 'capistrano-rails', '~> 3.9.1'
 end
 
 
