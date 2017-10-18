@@ -229,6 +229,7 @@ PLATFORMS
 DEPENDENCIES
   bullet
   byebug
+  capistrano (~> 3.9.1)
   capistrano-rails
   config
   debase

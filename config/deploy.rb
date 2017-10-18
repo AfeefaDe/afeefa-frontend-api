@@ -47,6 +47,19 @@ set :keep_releases, 5
 # set this to the number of versions to keep
 set :keep_assets, 2
 
+namespace :cache do
+
+  task :rebuild_all do
+    on roles(:web), in: :groups, limit: 3, wait: 10 do
+      # Here we can do anything such as:
+      within release_path do
+        execute "cd #{release_path} && bundle exec rails runner -e production 'CacheBuilder.new.build_all'"
+      end
+    end
+  end
+
+end
+
 namespace :deploy do
 
   task :restart do
@@ -96,5 +109,6 @@ namespace :deploy do
 
 end
 
-after 'deploy', 'deploy:restart'
-after 'deploy:rollback', 'deploy:restart'
+after 'deploy', 'cache:rebuild_all'
+after 'deploy:rollback', 'cache:rebuild_all'
+after 'cache:rebuild_all', 'deploy:restart'
