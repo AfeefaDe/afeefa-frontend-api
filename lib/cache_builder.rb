@@ -14,14 +14,16 @@ class CacheBuilder
       json = read_cache_file(entry.area, locale)
       jsonEntries = json['marketentries']
 
+      entry_found = false
       jsonEntries.map! do |jsonEntry|
         if jsonEntry['id'].to_s == id.to_s
+          entry_found = true
           entry
         else
           jsonEntry
         end
       end
-
+      jsonEntries << entry unless entry_found
       jsonEntries = jsonEntries.to_json(language: locale)
       content = "{\"marketentries\":#{jsonEntries}}"
       write_cache_file(entry.area, locale, content)
