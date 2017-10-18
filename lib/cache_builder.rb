@@ -15,7 +15,7 @@ class CacheBuilder
       jsonEntries = json['marketentries']
 
       jsonEntries.map! do |jsonEntry|
-        if jsonEntry['id'] == id
+        if jsonEntry['id'].to_s == id.to_s
           entry
         else
           jsonEntry
@@ -42,7 +42,7 @@ class CacheBuilder
       jsonEntries = json['marketentries']
 
       jsonEntries.select! do |jsonEntry|
-        if jsonEntry['entryType'] == type.capitalize && jsonEntry['id'] == id
+        if jsonEntry['entryType'] == type.capitalize && jsonEntry['id'].to_s == id.to_s
           false
         else
           true

@@ -160,7 +160,7 @@ class CacheBuilderTest < ActiveSupport::TestCase
 
     translation = create(:translation, cacheable: orga, language: 'fr', title: 'orga.1.title_fr')
 
-    cache_builder.translate_entry('orga', orga.id, 'fr')
+    cache_builder.translate_entry('orga', orga.id.to_s, 'fr')
 
     assert File.file?(File.join(CacheBuilder::CACHE_PATH, "leipzig-fr.json").to_s)
     file = File.read(File.join(CacheBuilder::CACHE_PATH, "leipzig-fr.json").to_s)
@@ -169,6 +169,20 @@ class CacheBuilderTest < ActiveSupport::TestCase
     assert_equal 2, json['marketentries'].length
     assert_equal 'orga.1.title_fr', json['marketentries'][0]['name']
     assert_equal 'orga.2.title', json['marketentries'][1]['name']
+  end
+
+  test 'translate entry with int id' do
+    orga = create(:orga, title: 'orga.1.title', area: 'leipzig')
+    cache_builder.send(:build_locale, 'leipzig', 'fr')
+
+    translation = create(:translation, cacheable: orga, language: 'fr', title: 'orga.1.title_fr')
+
+    cache_builder.translate_entry('orga', orga.id, 'fr')
+
+    file = File.read(File.join(CacheBuilder::CACHE_PATH, "leipzig-fr.json").to_s)
+    json = JSON.parse(file)
+
+    assert_equal 'orga.1.title_fr', json['marketentries'][0]['name']
   end
 
   test 'update entry' do
@@ -216,7 +230,7 @@ class CacheBuilderTest < ActiveSupport::TestCase
 
     orga2.destroy!
 
-    cache_builder.remove_entry('leipzig', 'orga', orga2.id)
+    cache_builder.remove_entry('leipzig', 'orga', orga2.id.to_s)
 
     locales = [Translation::DEFAULT_LOCALE] + Translation::TRANSLATABLE_LOCALES
     locales.each do |locale|
@@ -226,6 +240,23 @@ class CacheBuilderTest < ActiveSupport::TestCase
       assert_equal 2, json['marketentries'].length
       assert_equal 'orga.1.title', json['marketentries'][0]['name']
       assert_equal 'orga.3.title', json['marketentries'][1]['name']
+    end
+
+  end
+
+  test 'remove entry with int id' do
+    orga = create(:orga, title: 'orga.1.title', area: 'leipzig')
+    cache_builder.send(:build_area, 'leipzig')
+
+    orga.destroy!
+
+    cache_builder.remove_entry('leipzig', 'orga', orga.id)
+
+    locales = [Translation::DEFAULT_LOCALE] + Translation::TRANSLATABLE_LOCALES
+    locales.each do |locale|
+      file = File.read(File.join(CacheBuilder::CACHE_PATH, "leipzig-#{locale}.json").to_s)
+      json = JSON.parse(file)
+      assert_equal 0, json['marketentries'].length
     end
 
   end
