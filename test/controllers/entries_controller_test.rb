@@ -85,10 +85,12 @@ class EntriesControllerTest < ActionController::TestCase
         File.read(
           Rails.root.join('test', 'fixtures', 'files', 'create-orga.json')))
 
-    assert_difference -> { Orga.count } do
-      assert_no_difference -> { Orga.where(state: :active).count } do
-        post :create, params: orga_params
-        assert_response :created
+    assert_difference -> { Annotation.where(annotation_category: AnnotationCategory::EXTERNAL_ENTRY).count } do
+      assert_difference -> { Orga.count } do
+        assert_no_difference -> { Orga.where(state: :active).count } do
+          post :create, params: orga_params
+          assert_response :created
+        end
       end
     end
     assert_equal title = orga_params['marketentry']['name'], Orga.last.title
@@ -97,6 +99,8 @@ class EntriesControllerTest < ActionController::TestCase
     assert_equal placename, Orga.last.locations.last.placename
     contact_person = orga_params['marketentry']['speakerPublic']
     assert_equal contact_person, Orga.last.contact_infos.last.contact_person
+    assert_equal 1, Orga.last.annotations.count
+    assert_equal AnnotationCategory::EXTERNAL_ENTRY, Orga.last.annotations.last.annotation_category
 
     Time.freeze do
       assert_difference -> { Orga.count } do

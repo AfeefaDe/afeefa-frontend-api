@@ -57,7 +57,7 @@ class EntriesController < ApplicationController
   def map_marketentry_params(params)
     params.merge!(
       title: params.delete(:name),
-      category_id: params.delete(:category),
+      category: Category.where(parent_id: nil).where(title: params.delete(:category)).first,
       short_description: params.delete(:descriptionShort),
       for_children: params.delete(:forChildren),
       support_wanted: params.delete(:supportWanted),
