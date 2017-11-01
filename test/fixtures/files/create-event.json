@@ -1,0 +1,30 @@
+{
+  "marketentry": {
+    "type": "2",
+    "markettype": "0",
+    "name": "Mein neues Event",
+    "category": "5dddf63d-ccf6-44e2-8daf-81bb44507fdd",
+    "dateFrom": "2017-11-30",
+    "timeFrom": "12:02",
+    "dateTo": "",
+    "timeTo": "",
+    "descriptionShort": "Beschreibung des Events",
+    "forChildren": true,
+    "supportWanted": true,
+    "speakerPublic": "Mr. Sprich-mich-an",
+    "mail": "mail@example.com",
+    "phone": "01230123",
+    "spokenLanguages": [
+      "de"
+    ],
+    "web": "http://www.info-zum-event.de",
+    "facebook": "http://fb.com/event",
+    "area": "dresden"
+  },
+  "location": {
+    "placename": "um die ecke",
+    "street": "Hauptstr. 1",
+    "zip": "01309",
+    "city": "Dresden"
+  }
+}

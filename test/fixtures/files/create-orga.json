@@ -1,0 +1,31 @@
+{
+  "marketentry": {
+    "type": "0",
+    "markettype": "0",
+    "name": "Orga via Frontend",
+    "category": "5dddf63d-ccf6-44e2-8daf-81bb44507fdd",
+    "dateFrom": "",
+    "timeFrom": "",
+    "dateTo": "",
+    "timeTo": "",
+    "descriptionShort": "Beschreibung für Frontend-Orga",
+    "forChildren": true,
+    "supportWanted": true,
+    "speakerPublic": "Mister Ansprechpartner",
+    "mail": "steve@afeefa.de",
+    "phone": "01230123",
+    "spokenLanguages": [
+      "de",
+      "en"
+    ],
+    "web": "http://www.example.com",
+    "facebook": "http://fb.com/example",
+    "area": "dresden"
+  },
+  "location": {
+    "placename": "im Klassenzimmer",
+    "street": "Hauptstr. 1",
+    "zip": "01309",
+    "city": "Dresden"
+  }
+}

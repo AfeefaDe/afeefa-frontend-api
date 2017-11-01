@@ -13,6 +13,39 @@ module Entry
     attr_accessor :type, :entry_type, :phone, :mail, :social_media, :web, :contact_person, :spoken_languages
   end
 
+  module ClassMethods
+    def create_via_frontend(model_atrtibtues:, contact_info_attributes: nil, location_attributes: nil)
+      model = new(model_atrtibtues)
+      model.parent_orga = Orga.root_orga
+      model.state = :inactive
+
+      unless model.valid?
+        title_modified = false
+        tries = 1
+        while model.errors[:title].any? && (messages = model.errors[:title].join("\n")) &&
+          messages.include?('bereits vergeben') && (tries += 1) <= 10
+          title_modified = true
+          model.title << "_#{Time.current.to_i}"
+          model.valid?
+        end
+        if title_modified
+          annotation_category = AnnotationCategory.find_by(title: 'Titel ist bereits vergeben')
+          Annotation.create(entry: model, annotation_category: annotation_category,
+            detail: annotation_category.title)
+        end
+      end
+
+      model_save_success = model.save
+      location = Location.new(location_attributes.merge(locatable: model))
+      contact_info = ContactInfo.new(contact_info_attributes.merge(contactable: model))
+
+      {
+        model: model,
+        success: model_save_success && location.save && contact_info.save
+      }
+    end
+  end
+
   def as_json(*args)
     location = self.locations.first
     contact = self.contact_infos.first
