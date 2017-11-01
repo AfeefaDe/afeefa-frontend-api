@@ -4,6 +4,10 @@ class CategoriesControllerTest < ActionController::TestCase
 
   setup do
     assert category = create(:category, title: 'general', area: 'dresden')
+    assert sub_category =
+      create(:category, title: 'wifi', area: 'dresden', parent_id: category.id)
+    assert sub_category_2 =
+      create(:category, title: 'other', area: 'dresden', parent_id: category.id)
     assert category2 = create(:category, title: 'swimming', area: 'bautzen')
   end
 
@@ -14,6 +18,8 @@ class CategoriesControllerTest < ActionController::TestCase
     assert category = json['categories'].last
     assert category.key?('name')
     assert category.key?('id')
+    assert category.key?('sub')
+    assert_equal 2, category['sub'].count
   end
 
   test 'should get dresden/de' do
