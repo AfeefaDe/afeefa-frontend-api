@@ -4,6 +4,7 @@ Rails.application.routes.draw do
     get 'changes_webhook', to: 'change#update'
 
     resources :entries, only: %i(index create), path: 'marketentries'
+    resources :categories, only: %i(index)
   end
 
 end

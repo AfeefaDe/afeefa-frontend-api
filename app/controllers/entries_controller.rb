@@ -2,24 +2,6 @@ require 'cache_builder' #TODO: could vanish any time, may be
 
 class EntriesController < ApplicationController
 
-  def index
-    area =
-      if params['area'].present? && ['leipzig', 'bautzen'].include?(params['area'])
-        params['area']
-      else
-        'dresden'
-      end
-
-    locale =
-      if params['locale'].present? && Translation::TRANSLATABLE_LOCALES.include?(params['locale'])
-        params['locale']
-      else
-        Translation::DEFAULT_LOCALE
-      end
-
-    render_data(locale, area)
-  end
-
   def create
     case params['marketentry']['type'].to_s
     when '0' #'orga'

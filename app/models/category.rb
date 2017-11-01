@@ -4,8 +4,8 @@ class Category < ApplicationRecord
 
   def as_json(*args)
     {
-      :id => self.id,
-      :name => self.title
+      id: self.id,
+      name: self.title
     }
   end
 end
