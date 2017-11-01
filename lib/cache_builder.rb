@@ -12,10 +12,10 @@ class CacheBuilder
     entry = type == 'orga' ? get_entry(Orga, id, locale) : get_entry(Event, id, locale)
     if entry
       json = read_cache_file(entry.area, locale)
-      jsonEntries = json['marketentries']
+      json_entries = json['marketentries']
 
       entry_found = false
-      jsonEntries.map! do |jsonEntry|
+      json_entries.map! do |jsonEntry|
         if jsonEntry['id'].to_s == id.to_s
           entry_found = true
           entry
@@ -23,9 +23,9 @@ class CacheBuilder
           jsonEntry
         end
       end
-      jsonEntries << entry unless entry_found
-      jsonEntries = jsonEntries.to_json(language: locale)
-      content = "{\"marketentries\":#{jsonEntries}}"
+      json_entries << entry unless entry_found
+      json_entries = json_entries.to_json(language: locale)
+      content = "{\"marketentries\":#{json_entries}}"
       write_cache_file(entry.area, locale, content)
     end
   end
@@ -48,9 +48,9 @@ class CacheBuilder
     locales = [Translation::DEFAULT_LOCALE] + Translation::TRANSLATABLE_LOCALES
     locales.each do |locale|
       json = read_cache_file(area, locale)
-      jsonEntries = json['marketentries']
+      json_entries = json['marketentries']
 
-      jsonEntries.select! do |jsonEntry|
+      json_entries.select! do |jsonEntry|
         if jsonEntry['entryType'] == type.capitalize && jsonEntry['id'].to_s == id.to_s
           false
         else
@@ -58,8 +58,8 @@ class CacheBuilder
         end
       end
 
-      jsonEntries = jsonEntries.to_json(language: locale)
-      content = "{\"marketentries\":#{jsonEntries}}"
+      json_entries = json_entries.to_json(language: locale)
+      content = "{\"marketentries\":#{json_entries}}"
       write_cache_file(area, locale, content)
     end
   end
