@@ -222,6 +222,77 @@ class CacheBuilderTest < ActiveSupport::TestCase
 
   end
 
+  test 'update entry with new entry' do
+    orga = create(:orga, title: 'orga.1.title', area: 'leipzig')
+    cache_builder.send(:build_area, 'leipzig')
+
+    locales = [Translation::DEFAULT_LOCALE] + Translation::TRANSLATABLE_LOCALES
+    locales.each do |locale|
+      assert File.file?(File.join(CacheBuilder::CACHE_PATH, "leipzig-#{locale}.json").to_s)
+      file = File.read(File.join(CacheBuilder::CACHE_PATH, "leipzig-#{locale}.json").to_s)
+      json = JSON.parse(file)
+      assert_equal 1, json['marketentries'].length
+      assert_equal 'orga.1.title', json['marketentries'][0]['name']
+    end
+
+    orga2 = create(:orga, title: 'orga.2.title', area: 'leipzig')
+
+    cache_builder.update_entry('orga', orga2.id)
+
+    locales = [Translation::DEFAULT_LOCALE] + Translation::TRANSLATABLE_LOCALES
+    locales.each do |locale|
+      assert File.file?(File.join(CacheBuilder::CACHE_PATH, "leipzig-#{locale}.json").to_s)
+      file = File.read(File.join(CacheBuilder::CACHE_PATH, "leipzig-#{locale}.json").to_s)
+      json = JSON.parse(file)
+      assert_equal 2, json['marketentries'].length
+      assert_equal 'orga.1.title', json['marketentries'][0]['name']
+      assert_equal 'orga.2.title', json['marketentries'][1]['name']
+    end
+
+  end
+
+  test 'update entry with deactivated entry' do
+    orga = create(:orga, title: 'orga.1.title', area: 'leipzig')
+    orga2 = create(:orga, title: 'orga.2.title', area: 'leipzig')
+    cache_builder.send(:build_area, 'leipzig')
+
+    locales = [Translation::DEFAULT_LOCALE] + Translation::TRANSLATABLE_LOCALES
+    locales.each do |locale|
+      assert File.file?(File.join(CacheBuilder::CACHE_PATH, "leipzig-#{locale}.json").to_s)
+      file = File.read(File.join(CacheBuilder::CACHE_PATH, "leipzig-#{locale}.json").to_s)
+      json = JSON.parse(file)
+      assert_equal 2, json['marketentries'].length
+      assert_equal 'orga.1.title', json['marketentries'][0]['name']
+      assert_equal 'orga.2.title', json['marketentries'][1]['name']
+    end
+
+    orga.update(state: 'deactivated')
+    cache_builder.update_entry('orga', orga.id)
+
+    locales = [Translation::DEFAULT_LOCALE] + Translation::TRANSLATABLE_LOCALES
+    locales.each do |locale|
+      assert File.file?(File.join(CacheBuilder::CACHE_PATH, "leipzig-#{locale}.json").to_s)
+      file = File.read(File.join(CacheBuilder::CACHE_PATH, "leipzig-#{locale}.json").to_s)
+      json = JSON.parse(file)
+      assert_equal 1, json['marketentries'].length
+      assert_equal 'orga.2.title', json['marketentries'][0]['name']
+    end
+
+    orga.update(state: 'active')
+    cache_builder.update_entry('orga', orga.id)
+
+    locales = [Translation::DEFAULT_LOCALE] + Translation::TRANSLATABLE_LOCALES
+    locales.each do |locale|
+      assert File.file?(File.join(CacheBuilder::CACHE_PATH, "leipzig-#{locale}.json").to_s)
+      file = File.read(File.join(CacheBuilder::CACHE_PATH, "leipzig-#{locale}.json").to_s)
+      json = JSON.parse(file)
+      assert_equal 2, json['marketentries'].length
+      assert_equal 'orga.2.title', json['marketentries'][0]['name']
+      assert_equal 'orga.1.title', json['marketentries'][1]['name']
+    end
+
+  end
+
   test 'remove entry' do
     orga = create(:orga, title: 'orga.1.title', area: 'leipzig')
     orga2 = create(:orga, title: 'orga.2.title', area: 'leipzig')

@@ -12,26 +12,35 @@ class CacheBuilder
     entry = type == 'orga' ? get_entry(Orga, id, locale) : get_entry(Event, id, locale)
     if entry
       json = read_cache_file(entry.area, locale)
-      jsonEntries = json['marketentries']
+      json_entries = json['marketentries']
 
-      jsonEntries.map! do |jsonEntry|
+      entry_found = false
+      json_entries.map! do |jsonEntry|
         if jsonEntry['id'].to_s == id.to_s
+          entry_found = true
           entry
         else
           jsonEntry
         end
       end
-
-      jsonEntries = jsonEntries.to_json(language: locale)
-      content = "{\"marketentries\":#{jsonEntries}}"
+      json_entries << entry unless entry_found
+      json_entries = json_entries.to_json(language: locale)
+      content = "{\"marketentries\":#{json_entries}}"
       write_cache_file(entry.area, locale, content)
     end
   end
 
   def update_entry(type, id)
-    locales = [Translation::DEFAULT_LOCALE] + Translation::TRANSLATABLE_LOCALES
-    locales.each do |locale|
-      translate_entry(type, id, locale)
+    entry = type == 'orga' ? Orga.find_by(id: id) : Event.find_by(id: id)
+    if entry
+      if entry.state == 'active'
+        locales = [Translation::DEFAULT_LOCALE] + Translation::TRANSLATABLE_LOCALES
+        locales.each do |locale|
+          translate_entry(type, id, locale)
+        end
+      else
+        remove_entry(entry.area, type, id)
+      end
     end
   end
 
@@ -39,9 +48,9 @@ class CacheBuilder
     locales = [Translation::DEFAULT_LOCALE] + Translation::TRANSLATABLE_LOCALES
     locales.each do |locale|
       json = read_cache_file(area, locale)
-      jsonEntries = json['marketentries']
+      json_entries = json['marketentries']
 
-      jsonEntries.select! do |jsonEntry|
+      json_entries.select! do |jsonEntry|
         if jsonEntry['entryType'] == type.capitalize && jsonEntry['id'].to_s == id.to_s
           false
         else
@@ -49,8 +58,8 @@ class CacheBuilder
         end
       end
 
-      jsonEntries = jsonEntries.to_json(language: locale)
-      content = "{\"marketentries\":#{jsonEntries}}"
+      json_entries = json_entries.to_json(language: locale)
+      content = "{\"marketentries\":#{json_entries}}"
       write_cache_file(area, locale, content)
     end
   end
@@ -102,8 +111,7 @@ class CacheBuilder
   def get_entry(model_class, id, locale)
     entries = model_class.
       includes(:category, :sub_category, :locations, :contact_infos, :parent_orga, parent_orga: :contact_infos).
-      where(id: id).
-      where(state: 'active')
+      where(id: id)
     if locale != Translation::DEFAULT_LOCALE
       entries = entries.includes(:translation_caches)
     end

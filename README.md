@@ -34,3 +34,13 @@ Attach your local IDE debugger. VSCode example config:
       "remoteWorkspaceRoot": "/afeefa/fapi"
     }
 ```
+
+## Maintenance Tasks
+
+To be called locally 'on my machine' and run remotely:
+
+*build dev|production JSON data file cache*
+This command entirely rebuilds the data cached for use in frontend.
+Runs automatically after each deployment.
+
+`cap [dev|production] cache:build_all`
