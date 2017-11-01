@@ -80,7 +80,10 @@ class EntriesControllerTest < ActionController::TestCase
   end
 
   test 'should create orga' do
-    orga_params = { type: 'orga', title: 'special new orga' }
+    orga_params =
+      JSON.parse(
+        File.read(
+          Rails.root.join('test', 'fixtures', 'files', 'create-orga.json')))
 
     assert_difference -> { Orga.count } do
       assert_no_difference -> { Orga.where(state: :active).count } do
@@ -88,8 +91,12 @@ class EntriesControllerTest < ActionController::TestCase
         assert_response :created
       end
     end
-    assert_equal orga_params[:title], Orga.last.title
+    assert_equal title = orga_params['marketentry']['name'], Orga.last.title
     assert_equal 'inactive', Orga.last.state
+    placename = orga_params['location']['placename']
+    assert_equal placename, Orga.last.locations.last.placename
+    contact_person = orga_params['marketentry']['speakerPublic']
+    assert_equal contact_person, Orga.last.contact_infos.last.contact_person
 
     Time.freeze do
       assert_difference -> { Orga.count } do
@@ -98,7 +105,7 @@ class EntriesControllerTest < ActionController::TestCase
           assert_response :created
         end
       end
-      assert_match /\A#{orga_params[:title]}_\d*/, Orga.last.title
+      assert_match /\A#{title}_\d*/, Orga.last.title
       assert_equal 'inactive', Orga.last.state
 
       assert_no_difference -> { Orga.count } do
@@ -121,10 +128,10 @@ class EntriesControllerTest < ActionController::TestCase
   end
 
   test 'should create event' do
-    event_params = {
-      type: 'event', title: 'special new event',
-      date_start: Time.zone.parse("01.01.#{1.year.from_now.year} 10:00")
-    }
+    event_params =
+      JSON.parse(
+        File.read(
+          Rails.root.join('test', 'fixtures', 'files', 'create-event.json')))
 
     assert_difference -> { Event.count } do
       assert_no_difference -> { Event.where(state: :active).count } do
@@ -132,8 +139,12 @@ class EntriesControllerTest < ActionController::TestCase
         assert_response :created
       end
     end
-    assert_equal event_params[:title], Event.last.title
+    assert_equal title = event_params['marketentry']['name'], Event.last.title
     assert_equal 'inactive', Event.last.state
+    placename = event_params['location']['placename']
+    assert_equal placename, Event.last.locations.last.placename
+    contact_person = event_params['marketentry']['speakerPublic']
+    assert_equal contact_person, Event.last.contact_infos.last.contact_person
 
     Time.freeze do
       assert_difference -> { Event.count } do
@@ -142,7 +153,7 @@ class EntriesControllerTest < ActionController::TestCase
           assert_response :created
         end
       end
-      assert_match /\A#{event_params[:title]}_\d*/, Event.last.title
+      assert_match /\A#{title}_\d*/, Event.last.title
       assert_equal 'inactive', Event.last.state
 
       assert_no_difference -> { Event.count } do
