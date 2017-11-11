@@ -56,7 +56,7 @@ namespace :cache do
     on roles(:web), in: :groups, limit: 3, wait: 10 do
       # Here we can do anything such as:
       within release_path do
-        execute "cd #{release_path} && bundle exec rails runner -e production 'CacheBuilder.new.build_all'"
+        execute "cd #{release_path} && /home/ruby/.rbenv/bin/rbenv exec bundle exec rails runner -e production 'CacheBuilder.new.build_all'"
       end
     end
   end
@@ -75,7 +75,7 @@ namespace :deploy do
             else
               'frontend-dev-api'
             end
-        execute "svc -du ~/service/#{api}" # maybe we can use -h instead of -du
+        execute "sudo /bin/systemctl restart #{api}.service" # maybe we can use -h instead of -du
       end
     end
   end
@@ -90,7 +90,7 @@ namespace :deploy do
             else
               'frontend-dev-api'
             end
-        execute "svc -d ~/service/#{api}" # maybe we can use -h instead of -du
+        execute "sudo /bin/systemctl stop #{api}.service" # maybe we can use -h instead of -du
       end
     end
   end
@@ -105,7 +105,7 @@ namespace :deploy do
             else
               'frontend-dev-api'
             end
-        execute "svc -u ~/service/#{api}" # maybe we can use -h instead of -du
+        execute "sudo /bin/systemctl start #{api}.service" # maybe we can use -h instead of -du
       end
     end
   end
