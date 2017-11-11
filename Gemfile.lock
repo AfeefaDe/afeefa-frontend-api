@@ -58,6 +58,9 @@ GEM
     capistrano-rails (1.3.0)
       capistrano (~> 3.1)
       capistrano-bundler (~> 1.1)
+    capistrano-rbenv (2.1.2)
+      capistrano (~> 3.1)
+      sshkit (~> 1.3)
     code_analyzer (0.4.8)
       sexp_processor
     concurrent-ruby (1.0.5)
@@ -231,6 +234,7 @@ DEPENDENCIES
   byebug
   capistrano (~> 3.9.1)
   capistrano-rails
+  capistrano-rbenv (~> 2.1)
   config
   debase
   factory_girl_rails
@@ -252,4 +256,4 @@ DEPENDENCIES
   unicorn
 
 BUNDLED WITH
-   1.15.4
+   1.16.0
