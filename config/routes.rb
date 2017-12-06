@@ -5,6 +5,7 @@ Rails.application.routes.draw do
 
     resources :entries, only: %i(index create), path: 'marketentries'
     resources :categories, only: %i(index)
+    resources :chapters, only: %i(index show)
   end
 
 end

@@ -2,4 +2,4 @@ changes:
   webhook_api_token: <%= ENV["FAPI_CHANGES_WEBHOOK_TOKEN"] %>
 cache:
   path: public/cache
-
+chapters_api_path: 'http://localhost:3010/chapters'
