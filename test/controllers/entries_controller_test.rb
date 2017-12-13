@@ -251,4 +251,28 @@ class EntriesControllerTest < ActionController::TestCase
     assert event.time_end?
   end
 
+  test 'should created event without dateTo and timeTo' do
+    event_params =
+      JSON.parse(
+        File.read(
+          Rails.root.join('test', 'fixtures', 'files', 'create-event.json')))
+    event_params['marketentry']['dateTo'] = nil
+    event_params['marketentry']['timeTo'] = nil
+
+    assert_difference -> { Event.unscoped.count } do
+      assert_no_difference -> { Event.unscoped.where(state: :active).count } do
+        post :create, params: event_params
+        assert_response :created
+      end
+    end
+    event = Event.unscoped.last
+    assert_equal title = event_params['marketentry']['name'], event.title
+    assert_equal 'inactive', event.state
+    assert_equal event_params['marketentry']['dateFrom'], event.date_start.strftime('%Y-%m-%d')
+    assert_equal event_params['marketentry']['timeFrom'], event.date_start.strftime('%H:%M')
+    assert_nil event.date_end
+    assert event.time_start?
+    assert_not event.time_end?
+  end
+
 end

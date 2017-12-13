@@ -83,10 +83,10 @@ class EntriesController < ApplicationController
       #   end
       # for children, ...
     )
-    if params[:date_start].strftime('%H:%M') != '00:00'
+    if params[:date_start] && params[:date_start].strftime('%H:%M') != '00:00'
       params.merge!(time_start: true)
     end
-    if params[:date_end].strftime('%H:%M') != '00:00'
+    if params[:date_end] && params[:date_end].strftime('%H:%M') != '00:00'
       params.merge!(time_end: true)
     end
 
