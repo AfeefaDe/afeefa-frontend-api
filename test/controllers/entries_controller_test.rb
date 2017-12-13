@@ -85,7 +85,7 @@ class EntriesControllerTest < ActionController::TestCase
         File.read(
           Rails.root.join('test', 'fixtures', 'files', 'create-orga.json')))
 
-    assert_difference -> { Annotation.where(annotation_category: AnnotationCategory::EXTERNAL_ENTRY).count } do
+    assert_difference -> { Annotation.where(annotation_category: AnnotationCategory.external_entry).count } do
       assert_difference -> { Orga.count } do
         assert_no_difference -> { Orga.where(state: :active).count } do
           post :create, params: orga_params
@@ -99,8 +99,8 @@ class EntriesControllerTest < ActionController::TestCase
     assert_equal placename, Orga.last.locations.last.placename
     contact_person = orga_params['marketentry']['speakerPublic']
     assert_equal contact_person, Orga.last.contact_infos.last.contact_person
-    assert_equal 1, Orga.last.annotations.count
-    assert_equal AnnotationCategory::EXTERNAL_ENTRY, Orga.last.annotations.last.annotation_category
+    assert_equal 1, Annotation.where(entry: Orga.last).count
+    assert_equal AnnotationCategory.external_entry, Annotation.where(entry: Orga.last).last.annotation_category
 
     Time.freeze do
       assert_difference -> { Orga.count } do
@@ -137,31 +137,32 @@ class EntriesControllerTest < ActionController::TestCase
         File.read(
           Rails.root.join('test', 'fixtures', 'files', 'create-event.json')))
 
-    assert_difference -> { Event.count } do
-      assert_no_difference -> { Event.where(state: :active).count } do
+    assert_difference -> { Event.unscoped.count } do
+      assert_no_difference -> { Event.unscoped.where(state: :active).count } do
         post :create, params: event_params
         assert_response :created
       end
     end
-    assert_equal title = event_params['marketentry']['name'], Event.last.title
-    assert_equal 'inactive', Event.last.state
+    event = Event.unscoped.last
+    assert_equal title = event_params['marketentry']['name'], event.title
+    assert_equal 'inactive', event.state
     placename = event_params['location']['placename']
-    assert_equal placename, Event.last.locations.last.placename
+    assert_equal placename, event.locations.last.placename
     contact_person = event_params['marketentry']['speakerPublic']
-    assert_equal contact_person, Event.last.contact_infos.last.contact_person
+    assert_equal contact_person, event.contact_infos.last.contact_person
 
     Time.freeze do
-      assert_difference -> { Event.count } do
-        assert_no_difference -> { Event.where(state: :active).count } do
+      assert_difference -> { Event.unscoped.count } do
+        assert_no_difference -> { Event.unscoped.where(state: :active).count } do
           post :create, params: event_params
           assert_response :created
         end
       end
-      assert_match /\A#{title}_\d*/, Event.last.title
-      assert_equal 'inactive', Event.last.state
+      assert_match /\A#{title}_\d*/, event.title
+      assert_equal 'inactive', event.state
 
-      assert_no_difference -> { Event.count } do
-        assert_no_difference -> { Event.where(state: :active).count } do
+      assert_no_difference -> { Event.unscoped.count } do
+        assert_no_difference -> { Event.unscoped.where(state: :active).count } do
           post :create, params: event_params
           assert_response :unprocessable_entity
           assert_match 'bereits vergeben', response.body
@@ -170,13 +171,84 @@ class EntriesControllerTest < ActionController::TestCase
     end
 
     Event.any_instance.stubs(:save).returns(false)
-    assert_no_difference -> { Event.count } do
-      assert_no_difference -> { Event.where(state: :active).count } do
+    assert_no_difference -> { Event.unscoped.count } do
+      assert_no_difference -> { Event.unscoped.where(state: :active).count } do
         post :create, params: event_params
         assert_response :unprocessable_entity
         assert_match 'internal error', response.body
       end
     end
+  end
+
+  test 'should set time information for time_start and time_end at created event' do
+    event_params =
+      JSON.parse(
+        File.read(
+          Rails.root.join('test', 'fixtures', 'files', 'create-event.json')))
+
+    assert_difference -> { Event.unscoped.count } do
+      assert_no_difference -> { Event.unscoped.where(state: :active).count } do
+        post :create, params: event_params
+        assert_response :created
+      end
+    end
+    event = Event.unscoped.last
+    assert_equal title = event_params['marketentry']['name'], event.title
+    assert_equal 'inactive', event.state
+    assert_equal event_params['marketentry']['dateFrom'], event.date_start.strftime('%Y-%m-%d')
+    assert_equal event_params['marketentry']['dateTo'], event.date_end.strftime('%Y-%m-%d')
+    assert_equal event_params['marketentry']['timeFrom'], event.date_start.strftime('%H:%M')
+    assert_equal event_params['marketentry']['timeTo'], event.date_end.strftime('%H:%M')
+    assert event.time_start?
+    assert event.time_end?
+  end
+
+  test 'should set time information for time_start at created event' do
+    event_params =
+      JSON.parse(
+        File.read(
+          Rails.root.join('test', 'fixtures', 'files', 'create-event.json')))
+    event_params['marketentry']['timeTo'] = '00:00'
+
+    assert_difference -> { Event.unscoped.count } do
+      assert_no_difference -> { Event.unscoped.where(state: :active).count } do
+        post :create, params: event_params
+        assert_response :created
+      end
+    end
+    event = Event.unscoped.last
+    assert_equal title = event_params['marketentry']['name'], event.title
+    assert_equal 'inactive', event.state
+    assert_equal event_params['marketentry']['dateFrom'], event.date_start.strftime('%Y-%m-%d')
+    assert_equal event_params['marketentry']['dateTo'], event.date_end.strftime('%Y-%m-%d')
+    assert_equal event_params['marketentry']['timeFrom'], event.date_start.strftime('%H:%M')
+    assert_equal event_params['marketentry']['timeTo'], event.date_end.strftime('%H:%M')
+    assert event.time_start?
+    assert_not event.time_end?
+  end
+
+  test 'should set time information for time_end at created event' do
+    event_params =
+      JSON.parse(
+        File.read(
+          Rails.root.join('test', 'fixtures', 'files', 'create-event.json')))
+    event_params['marketentry']['timeFrom'] = '00:00'
+
+    assert_difference -> { Event.unscoped.count } do
+      assert_no_difference -> { Event.unscoped.where(state: :active).count } do
+        post :create, params: event_params
+        assert_response :created
+      end
+    end
+    event = Event.unscoped.last
+    assert_equal title = event_params['marketentry']['name'], event.title
+    assert_equal 'inactive', event.state
+    assert_equal event_params['marketentry']['dateFrom'], event.date_start.strftime('%Y-%m-%d')
+    assert_equal event_params['marketentry']['dateTo'], event.date_end.strftime('%Y-%m-%d')
+    assert_equal event_params['marketentry']['timeFrom'], event.date_start.strftime('%H:%M')
+    assert_equal event_params['marketentry']['timeTo'], event.date_end.strftime('%H:%M')
+    assert_not event.time_start?
+    assert event.time_end?
   end
 
 end

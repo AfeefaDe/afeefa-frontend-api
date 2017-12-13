@@ -39,7 +39,7 @@ module Entry
       location = Location.new(location_attributes.merge(locatable: model))
       contact_info = ContactInfo.new(contact_info_attributes.merge(contactable: model))
 
-      annotation_category = AnnotationCategory::EXTERNAL_ENTRY
+      annotation_category = AnnotationCategory.external_entry
       Annotation.create(entry: model, annotation_category: annotation_category,
         detail: annotation_category.title)
 

@@ -4,8 +4,6 @@ class AnnotationCategory < ApplicationRecord
   has_many :events, through: :annotations, source: :entry, source_type: 'Event'
   has_many :orgas, through: :annotations, source: :entry, source_type: 'Orga'
 
-  EXTERNAL_ENTRY = AnnotationCategory.where(title: 'Externer Eintrag').last.freeze
-
   # CLASS METHODS
   class << self
     def attribute_whitelist_for_json
@@ -14,6 +12,10 @@ class AnnotationCategory < ApplicationRecord
 
     def default_attributes_for_json
       %i(title generated_by_system).freeze
+    end
+
+    def external_entry
+      @@entry ||= AnnotationCategory.where(title: 'Externer Eintrag').last.freeze
     end
   end
 

@@ -82,11 +82,20 @@ class EntriesController < ApplicationController
       #     Orga.root_orga
       #   end
       # for children, ...
-    ).slice(
+    )
+    if params[:date_start].strftime('%H:%M') != '00:00'
+      params.merge!(time_start: true)
+    end
+    if params[:date_end].strftime('%H:%M') != '00:00'
+      params.merge!(time_end: true)
+    end
+
+    params.slice(
       :title, :category, :short_description,
       :for_children, :support_wanted, :support_wanted_detail,
       :area,
       :date_start, :date_end, #:parent_orga
+      :time_start, :time_end,
     )
   end
 
@@ -115,7 +124,8 @@ class EntriesController < ApplicationController
   end
 
   def parse_date_time(date, time)
-    date_time = DateTime.parse("#{date} #{time}") rescue nil
+    zone = 'Berlin'
+    date_time = ActiveSupport::TimeZone[zone].parse("#{date} #{time}") rescue nil
     date = Date.parse("#{date}") rescue nil
     # time = Time.parse("#{time}") rescue nil
     date_time || date
