@@ -15,7 +15,7 @@ class AnnotationCategory < ApplicationRecord
     end
 
     def external_entry
-      @@entry ||= AnnotationCategory.where(title: 'Externer Eintrag').last.freeze
+      @@entry ||= AnnotationCategory.where(title: 'Externe Eintragung').last.freeze
     end
   end
 

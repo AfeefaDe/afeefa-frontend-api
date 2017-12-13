@@ -30,8 +30,7 @@ module Entry
         end
         if title_modified
           annotation_category = AnnotationCategory.find_by(title: 'Titel ist bereits vergeben')
-          Annotation.create(entry: model, annotation_category: annotation_category,
-            detail: annotation_category.title)
+          Annotation.create(entry: model, annotation_category: annotation_category)
         end
       end
 
