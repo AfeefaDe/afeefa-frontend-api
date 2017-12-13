@@ -64,15 +64,15 @@ class EntriesController < ApplicationController
       # support_wanted_detail: params.delete(:supportWanted),
       date_start:
         if params[:dateFrom] || params[:timeFrom]
-          date = params.delete(:dateFrom)
-          time = params.delete(:timeFrom)
+          date = params[:dateFrom]
+          time = params[:timeFrom]
           parse_date_time(date, time)
         end,
       date_end:
         if params[:dateTo] || params[:timeTo]
-          date = params.delete(:dateTo)
-          time = params.delete(:timeTo)
-          parse_date_time(date, time)
+          date = params[:dateTo]
+          time = params[:timeTo]
+          parse_date_time(date, time, fallback_date: params[:dateFrom])
         end,
       # speaker_public: params.delete(:speakerPublic), → migrated to contact_person
       # parent_orga:
@@ -123,8 +123,10 @@ class EntriesController < ApplicationController
     send_file cache_file_path, type: 'application/json', disposition: 'inline'
   end
 
-  def parse_date_time(date, time)
+  def parse_date_time(date, time, fallback_date: nil)
     zone = 'Berlin'
+    # use fallback date (date from) if only end time given
+    date = fallback_date if date.blank? && time.present?
     date_time = ActiveSupport::TimeZone[zone].parse("#{date} #{time}") rescue nil
     date = Date.parse("#{date}") rescue nil
     # time = Time.parse("#{time}") rescue nil
