@@ -30,7 +30,8 @@ module Entry
         end
         if title_modified
           annotation_category = AnnotationCategory.find_by(title: 'Titel ist bereits vergeben')
-          Annotation.create(entry: model, annotation_category: annotation_category)
+          Annotation.create(entry: model, annotation_category: annotation_category,
+            detail: annotation_category.title)
         end
       end
 
@@ -39,8 +40,7 @@ module Entry
       contact_info = ContactInfo.new(contact_info_attributes.merge(contactable: model))
 
       annotation_category = AnnotationCategory.external_entry
-      Annotation.create(entry: model, annotation_category: annotation_category,
-        detail: annotation_category.title)
+      Annotation.create(entry: model, annotation_category: annotation_category)
 
       {
         model: model,

@@ -85,7 +85,12 @@ class EntriesControllerTest < ActionController::TestCase
         File.read(
           Rails.root.join('test', 'fixtures', 'files', 'create-orga.json')))
 
-    assert_difference -> { Annotation.where(annotation_category: AnnotationCategory.external_entry).count } do
+    assert_difference -> {
+      Annotation.
+        where(annotation_category: AnnotationCategory.external_entry).
+        where(detail: nil).
+        count
+    } do
       assert_difference -> { Orga.count } do
         assert_no_difference -> { Orga.where(state: :active).count } do
           post :create, params: orga_params
