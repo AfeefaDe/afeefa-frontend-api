@@ -5,7 +5,7 @@ class Event < ApplicationRecord
   belongs_to :parent_orga, class_name: 'Orga', foreign_key: 'orga_id'
 
   scope :upcoming, -> {
-    now = Time.now.beginning_of_day
+    now = Time.now.in_time_zone(Time.zone).beginning_of_day
     # date_start >= today 00:00
     # date_end >= today 00:00
     where('date_start >= ?', now).
