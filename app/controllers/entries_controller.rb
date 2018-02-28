@@ -1,4 +1,5 @@
 require 'cache_builder' #TODO: could vanish any time, may be
+require 'message_api/client' #TODO: could vanish any time, may be
 
 class EntriesController < ApplicationController
 
