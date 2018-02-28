@@ -3,3 +3,13 @@ changes:
 cache:
   path: public/cache
 chapters_api_path: 'http://localhost:3010/chapters'
+backend_api:
+  path: 'http://localhost:3000'
+message_api:
+  key: 'test123'
+  path: 'http://localhost:3015'
+  templates:
+    new_entry:
+      to:
+        - foo@example.com
+      reply_to: []
