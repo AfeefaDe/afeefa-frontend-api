@@ -11,23 +11,6 @@ module MessageApi::Client
       Settings.message_api.key || 'test123'
     end
 
-    def get_config(config:, key:, default: nil)
-      value = [
-        Settings.message_api.try(:templates).try(:send, key).try(:area).try(area).try(:to) ||
-          Settings.message_api.send(config)
-      ].flatten.compact.first
-      Rails.logger.warn("could not find #{config} for template #{key} for area #{area}") unless value
-      value || default
-    end
-
-    def to(key:)
-      get_config(config: :to, key: key, default: 'team@afeefa.de')
-    end
-
-    def reply_to(key:)
-      get_config(config: :reply_to, key: key, default: 'team@afeefa.de')
-    end
-
     def backend_link(model)
       "#{Settings.backend_api.path}/#{model.class.name.underscore.pluralize}/#{model.id}/edit"
     end
@@ -45,9 +28,7 @@ module MessageApi::Client
 
       payload = {
         key: api_key,
-        area: area,
-        to: to(:new_entry),
-        reply_to: reply_to(:new_entry),
+        area: area
       }.merge(params || {})
 
       HTTP.post("#{base_path}/send/newEntryInfo",
