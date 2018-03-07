@@ -38,6 +38,7 @@ module MessageApi
       end
 
       def get_contact_data(model)
+        # TODO: This needs to be migrated for new data structure and plugin structure
         contact_info = ContactInfo.where(contactable: model).first
         if contact_info
           params.reverse_merge!(
