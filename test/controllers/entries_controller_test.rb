@@ -391,4 +391,58 @@ class EntriesControllerTest < ActionController::TestCase
     assert event.time_end?
   end
 
+  test 'should contact orga' do
+    assert_contact_entry_mail_success
+
+    orga = Orga.last
+    ContactInfo.create!(contactable: orga, contact_person: 'Max Mustermann', mail: 'max@mustermann.foo')
+    assert ContactInfo.where(contactable: orga).any?
+
+    post :contact_entry, params: {
+      type: 'orgas',
+      id: orga.id,
+      message: 'This is a dummy message.',
+      author: 'dummy author',
+      mail: 'dummy@author.com',
+      phone: '01815'
+    }
+    assert_response :created
+  end
+
+  test 'should handle message api error on contact orga' do
+    assert_contact_entry_mail_error
+
+    orga = Orga.last
+    ContactInfo.create!(contactable: orga, contact_person: 'Max Mustermann', mail: 'max@mustermann.foo')
+    assert ContactInfo.where(contactable: orga).any?
+
+    post :contact_entry, params: {
+      type: 'orgas',
+      id: orga.id,
+      message: 'This is a dummy message.',
+      author: 'dummy author',
+      mail: 'dummy@author.com',
+      phone: '01815'
+    }
+    assert_response 500
+    assert_equal 'error during sending contact mail: response error', response.body
+  end
+
+  test 'should raise not found if orga has no contact data' do
+    orga = Orga.last
+    ContactInfo.where(contactable: orga).destroy_all
+    assert ContactInfo.where(contactable: orga).blank?
+
+    assert_raise ActiveRecord::RecordNotFound do
+      post :contact_entry, params: {
+        type: 'orgas',
+        id: orga.id,
+        message: 'This is a dummy message.',
+        author: 'dummy author',
+        mail: 'dummy@author.com',
+        phone: '01815'
+      }
+    end
+  end
+
 end

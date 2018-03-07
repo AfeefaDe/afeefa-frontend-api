@@ -26,7 +26,7 @@ class EntriesController < ApplicationController
     success = result[:success]
 
     if success
-      response = MessageApi::Client.notify_for_new_entry(model)
+      response = MessageApi::Client.notify_for_new_entry(model: model)
       unless 201 == response.status
         message = 'error during sending new entry notification'
         message << ': '
@@ -49,7 +49,33 @@ class EntriesController < ApplicationController
     end
   end
 
+  def contact_entry
+    case contact_entry_params[:type].to_s
+    when 'orgas'
+      model = Orga.find(contact_entry_params[:id])
+    when 'events'
+      model = Event.find(contact_entry_params[:id])
+    else
+      render plain: 'invalid type', status: :unprocessable_entity
+      return
+    end
+    response = MessageApi::Client.send_contact_message(model: model, params: contact_entry_params.to_h)
+    if 201 == response.status
+      render plain: 'OK', status: :created
+    else
+      message = 'error during sending contact mail'
+      message << ': '
+      message << response.body
+      Rails.logger.warn message
+      render plain: message, status: :internal_server_error
+    end
+  end
+
   private
+
+  def contact_entry_params
+    params.permit(:type, :id, :message, :author, :mail, :phone)
+  end
 
   def orga_params
     # params.permit(:title)

@@ -2,9 +2,8 @@ require 'http'
 
 module MessageApi
   module Client
-
     class << self
-      def notify_for_new_entry(model)
+      def notify_for_new_entry(model:)
         params = {
           title: model.title,
           description: model.short_description,
@@ -12,15 +11,33 @@ module MessageApi
         }
 
         if contact_data = get_contact_data(model)
-          params.reverse_merge!(contact_data || {})
+          params.reverse_merge!(contact_data)
         end
 
         payload = {
           key: api_key,
           area: model.area || 'dresden'
-        }.merge(params || {})
+        }.merge(params)
 
         http_client.send_new_entry_info(payload)
+      end
+
+      def send_contact_message(model:, params:)
+        params ||= {}
+
+        if contact_data = get_contact_data(model)
+          params.reverse_merge!(to: contact_data[:email])
+        else
+          raise ActiveRecord::RecordNotFound,
+            "Could not find contact_data for model '#{model.try(:title) rescue nil}'"
+        end
+
+        payload = {
+          key: api_key,
+          area: model.area || 'dresden'
+        }.merge(params.except(:type, :id))
+
+        http_client.send_contact_mail(payload)
       end
 
       private
@@ -41,10 +58,10 @@ module MessageApi
         # TODO: This needs to be migrated for new data structure and plugin structure
         contact_info = ContactInfo.where(contactable: model).first
         if contact_info
-          params.reverse_merge!(
+          {
             name: contact_info.contact_person,
             email: contact_info.mail
-          )
+          }
         end
       rescue => exc
         Rails.logger.error exc.message
@@ -52,7 +69,6 @@ module MessageApi
         nil
       end
     end
-
   end
 
   # module for encapsulation of http requests
@@ -64,12 +80,17 @@ module MessageApi
           body: payload.to_json)
       end
 
+      def send_contact_mail(payload)
+        HTTP.post("#{base_path}/send/contactMail",
+          headers: { 'Content-Type' => 'application/json' },
+          body: payload.to_json)
+      end
+
       private
 
       def base_path
         Settings.message_api.path || 'http://localhost:3015'
       end
     end
-
   end
 end

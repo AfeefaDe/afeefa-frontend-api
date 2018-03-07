@@ -19,4 +19,8 @@ class ApplicationController < ActionController::API
     render_data(locale, area)
   end
 
+  def render_data(locale, area)
+    raise ActiveRecord::RecordNotFound
+  end
+
 end
