@@ -12,15 +12,19 @@ module MessageApi::Client
     end
 
     def to(key)
-      [
-        Settings.message_api.send(key).try(:to) || Settings.message_api.to
-      ].flatten.compact.first || 'team@afeefa.de'
+      to = [
+        Settings.message_api.templates.send(key).try(:to) || Settings.message_api.to
+      ].flatten.compact.first
+      Rails.logger.warn("could not find to for template #{key}") unless to
+      to || 'team@afeefa.de'
     end
 
     def reply_to(key)
-      [
-        Settings.message_api.send(key).try(:reply_to) || Settings.message_api.reply_to
+      reply_to = [
+        Settings.message_api.templates.send(key).try(:reply_to) || Settings.message_api.reply_to
       ].flatten.compact.first || 'team@afeefa.de'
+      Rails.logger.warn("could not find reply_to for template #{key}") unless reply_to
+      reply_to || 'team@afeefa.de'
     end
 
     def backend_link(model)
