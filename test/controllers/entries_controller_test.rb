@@ -1,8 +1,13 @@
 require 'test_helper'
+require 'message_api_test_helper'
 
 class EntriesControllerTest < ActionController::TestCase
 
+  include MessageApiTestHelper
+
   setup do
+    @message_api = mock_message_api
+
     orga = create(:orga, title: 'orga.1.title', area: 'dresden', translated_locales: ['en'])
     @event = create(:event, title: 'event.1.title', area: 'dresden', parent_orga: orga)
     event2 = create(:event, title: 'event.2.title', area: 'dresden')
@@ -80,6 +85,73 @@ class EntriesControllerTest < ActionController::TestCase
   end
 
   test 'should create orga' do
+    assert_new_entry_info_success do |payload|
+      assert payload.key?(:key)
+      assert_equal 'Orga via Frontend', payload[:title]
+    end
+
+    orga_params =
+      JSON.parse(
+        File.read(
+          Rails.root.join('test', 'fixtures', 'files', 'create-orga.json')))
+
+    assert_difference -> {
+      Annotation.
+        where(annotation_category: AnnotationCategory.external_entry).
+        where(detail: nil).
+        count
+    } do
+      assert_difference -> { Orga.count } do
+        assert_no_difference -> { Orga.where(state: :active).count } do
+          post :create, params: orga_params
+          assert_response :created
+        end
+      end
+    end
+    assert_equal title = orga_params['marketentry']['name'], Orga.last.title
+    assert_equal 'inactive', Orga.last.state
+    placename = orga_params['location']['placename']
+    assert_equal placename, Orga.last.locations.last.placename
+    contact_person = orga_params['marketentry']['speakerPublic']
+    assert_equal contact_person, Orga.last.contact_infos.last.contact_person
+    assert_equal 1, Annotation.where(entry: Orga.last).count
+    assert_equal AnnotationCategory.external_entry, Annotation.where(entry: Orga.last).last.annotation_category
+
+    Time.freeze do
+      assert_difference -> { Orga.count } do
+        assert_no_difference -> { Orga.where(state: :active).count } do
+          post :create, params: orga_params
+          assert_response :created
+        end
+      end
+      assert_match /\A#{title}_\d*/, Orga.last.title
+      assert_equal 'inactive', Orga.last.state
+
+      assert_no_difference -> { Orga.count } do
+        assert_no_difference -> { Orga.where(state: :active).count } do
+          post :create, params: orga_params
+          assert_response :unprocessable_entity
+          assert_match 'bereits vergeben', response.body
+        end
+      end
+    end
+
+    Orga.any_instance.stubs(:save).returns(false)
+    assert_no_difference -> { Orga.count } do
+      assert_no_difference -> { Orga.where(state: :active).count } do
+        post :create, params: orga_params
+        assert_response :unprocessable_entity
+        assert_match 'internal error', response.body
+      end
+    end
+  end
+
+  test 'should create orga with error during new entry notification' do
+    assert_new_entry_info_error do |payload|
+      assert payload.key?(:key)
+      assert_equal 'Orga via Frontend', payload[:title]
+    end
+
     orga_params =
       JSON.parse(
         File.read(
@@ -137,6 +209,10 @@ class EntriesControllerTest < ActionController::TestCase
   end
 
   test 'should create event' do
+    assert_new_entry_info_success do |payload|
+      assert_equal 'Mein neues Event', payload[:title]
+    end
+
     event_params =
       JSON.parse(
         File.read(
@@ -186,6 +262,8 @@ class EntriesControllerTest < ActionController::TestCase
   end
 
   test 'should set time information for time_start and time_end at created event' do
+    assert_new_entry_info_success
+
     event_params =
       JSON.parse(
         File.read(
@@ -209,6 +287,8 @@ class EntriesControllerTest < ActionController::TestCase
   end
 
   test 'should set time information for time_start at created event' do
+    assert_new_entry_info_success
+
     event_params =
       JSON.parse(
         File.read(
@@ -233,6 +313,8 @@ class EntriesControllerTest < ActionController::TestCase
   end
 
   test 'should set time information for time_end at created event' do
+    assert_new_entry_info_success
+
     event_params =
       JSON.parse(
         File.read(
@@ -257,6 +339,8 @@ class EntriesControllerTest < ActionController::TestCase
   end
 
   test 'should created event without dateTo and timeTo' do
+    assert_new_entry_info_success
+
     event_params =
       JSON.parse(
         File.read(
@@ -281,6 +365,8 @@ class EntriesControllerTest < ActionController::TestCase
   end
 
   test 'should created event without dateTo but timeTo' do
+    assert_new_entry_info_success
+
     event_params =
       JSON.parse(
         File.read(

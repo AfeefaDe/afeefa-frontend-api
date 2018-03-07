@@ -27,7 +27,7 @@ class EntriesController < ApplicationController
 
     if success
       response = MessageApi::Client.notify_for_new_entry(model)
-      unless 200 == response.status
+      unless 201 == response.status
         message = 'error during sending new entry notification'
         message << ': '
         message << response.body
