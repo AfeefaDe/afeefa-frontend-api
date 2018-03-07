@@ -41,8 +41,8 @@ module MessageApi
         contact_info = ContactInfo.where(contactable: model).first
         if contact_info
           params.reverse_merge!(
-            name: contact_info.contact_person || 'nicht angegeben',
-            email: contact_info.mail || 'nicht angegeben'
+            name: contact_info.contact_person,
+            email: contact_info.mail
           )
         end
       rescue => exc
