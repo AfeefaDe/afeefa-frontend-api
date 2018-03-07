@@ -81,7 +81,7 @@ module MessageApi
       end
 
       def send_contact_mail(payload)
-        HTTP.post("#{base_path}/send/contactMail",
+        HTTP.post("#{base_path}/send/messageFromUserToOwner",
           headers: { 'Content-Type' => 'application/json' },
           body: payload.to_json)
       end
