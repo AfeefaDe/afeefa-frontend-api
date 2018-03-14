@@ -19,6 +19,15 @@ module Entry
       model.parent_orga = Orga.root_orga
       model.state = :inactive
 
+      unless model.valid?
+        tries = 1
+        while model.errors[:title].any? && (messages = model.errors[:title].join("\n")) &&
+          messages.include?('bereits vergeben') && (tries += 1) <= 10
+          model.title << "_#{Time.current.to_i}"
+          model.valid?
+        end
+      end
+
       model_save_success = model.save
       if location_attributes.present?
         location = Location.new(location_attributes.merge(locatable: model))
