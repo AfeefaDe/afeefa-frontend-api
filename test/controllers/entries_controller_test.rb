@@ -140,7 +140,7 @@ class EntriesControllerTest < ActionController::TestCase
     assert_no_difference -> { Orga.count } do
       assert_no_difference -> { Orga.where(state: :active).count } do
         post :create, params: orga_params
-        assert_response :unprocessable_entity
+        assert_response :internal_server_error
         assert_match 'internal error', response.body
       end
     end
@@ -202,7 +202,7 @@ class EntriesControllerTest < ActionController::TestCase
     assert_no_difference -> { Orga.count } do
       assert_no_difference -> { Orga.where(state: :active).count } do
         post :create, params: orga_params
-        assert_response :unprocessable_entity
+        assert_response :internal_server_error
         assert_match 'internal error', response.body
       end
     end
@@ -255,7 +255,7 @@ class EntriesControllerTest < ActionController::TestCase
     assert_no_difference -> { Event.unscoped.count } do
       assert_no_difference -> { Event.unscoped.where(state: :active).count } do
         post :create, params: event_params
-        assert_response :unprocessable_entity
+        assert_response :internal_server_error
         assert_match 'internal error', response.body
       end
     end
@@ -424,8 +424,8 @@ class EntriesControllerTest < ActionController::TestCase
       mail: 'dummy@author.com',
       phone: '01815'
     }
-    assert_response 500
-    assert_equal 'error during sending contact mail: response error', response.body
+    assert_response :internal_server_error
+    assert_equal 'error during sending message for contact entry: response error', response.body
   end
 
   test 'should raise not found if orga has no contact data' do
@@ -443,6 +443,103 @@ class EntriesControllerTest < ActionController::TestCase
         phone: '01815'
       }
     end
+  end
+
+  test 'should create feedback for orga with message api success' do
+    assert_feedback_entry_mail_success
+
+    orga = Orga.last
+    message = "This is a dummy-\nmessage for the feedback test"
+    params = dummy_feedback_entry_params(orga).merge(message: message)
+
+    assert_difference -> { Annotation.count } do
+      post :feedback_entry, params: params
+      assert_response :created, response.body
+    end
+    assert annotation = Annotation.last
+    assert_equal orga, annotation.entry
+    assert_equal AnnotationCategory.external_feedback, annotation.annotation_category
+    expect_annotation_detail(annotation, params)
+  end
+
+  test 'should create feedback for orga with message api error' do
+    assert_feedback_entry_mail_error
+
+    orga = Orga.last
+    message = "This is a dummy-\nmessage for the feedback test"
+    params = dummy_feedback_entry_params(orga).merge(message: message)
+
+    assert_difference -> { Annotation.count } do
+      post :feedback_entry, params: params
+      assert_response :created, response.body
+    end
+    assert annotation = Annotation.last
+    assert_equal orga, annotation.entry
+    assert_equal AnnotationCategory.external_feedback, annotation.annotation_category
+    expect_annotation_detail(annotation, params)
+  end
+
+  test 'should handle create feedback error for orga with message api success' do
+    assert_feedback_entry_mail_success
+    Rails.logger.expects(:warn).with do |message|
+      assert_match 'could not create annotation', message
+      true
+    end
+
+    orga = Orga.last
+    message = "This is a dummy-\nmessage for the feedback test"
+    params = dummy_feedback_entry_params(orga).merge(message: message)
+
+    Annotation.any_instance.stubs(:save).returns(false)
+    assert_no_difference -> { Annotation.count } do
+      post :feedback_entry, params: params
+      assert_response :internal_server_error, response.body
+    end
+  end
+
+  test 'should handle create feedback error for orga with message api error' do
+    assert_feedback_entry_mail_error
+    Rails.logger.unstub(:warn)
+    Rails.logger.expects(:warn).with do |message|
+      unless message =~ /could not create annotation/
+        assert_equal 'error during sending message for feedback entry: response error', message
+      end
+      true
+    end.twice
+
+    orga = Orga.last
+    message = "This is a dummy-\nmessage for the feedback test"
+    params = dummy_feedback_entry_params(orga).merge(message: message)
+
+    Annotation.any_instance.stubs(:save).returns(false)
+    assert_no_difference -> { Annotation.count } do
+      post :feedback_entry, params: params
+      assert_response :internal_server_error, response.body
+    end
+  end
+
+  private
+
+  def expect_annotation_detail(annotation, params)
+    expected_detail =
+      "#{params[:message]}\n#{params[:author]} " +
+        "(#{[params[:mail], params[:phone]].join(', ')})"
+    assert_equal expected_detail, annotation.detail
+  end
+
+  def dummy_contact_entry_params(model)
+    {
+      type: model.class.to_s.underscore.pluralize,
+      id: model.id,
+      message: 'This is a dummy message.',
+      author: 'dummy author',
+      mail: 'dummy@author.com',
+      phone: '01815'
+    }
+  end
+
+  def dummy_feedback_entry_params(model)
+    dummy_contact_entry_params(model)
   end
 
 end

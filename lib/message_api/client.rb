@@ -22,7 +22,7 @@ module MessageApi
         http_client.send_new_entry_info(payload)
       end
 
-      def send_contact_message(model:, params:)
+      def send_contact_message_for_entry(model:, params:)
         params ||= {}
 
         if contact_data = get_contact_data(model)
@@ -37,7 +37,18 @@ module MessageApi
           area: model.area || 'dresden'
         }.merge(params.except(:type, :id))
 
-        http_client.send_contact_mail(payload)
+        http_client.send_entry_contact_message(payload)
+      end
+
+      def send_feedback_message_for_entry(model:, params:)
+        params ||= {}
+
+        payload = {
+          key: api_key,
+          area: model.area || 'dresden'
+        }.merge(params.except(:type, :id))
+
+        http_client.send_entry_feedback_info(payload)
       end
 
       private
@@ -80,7 +91,13 @@ module MessageApi
           body: payload.to_json)
       end
 
-      def send_contact_mail(payload)
+      def send_entry_contact_message(payload)
+        HTTP.post("#{base_path}/send/messageFromUserToOwner",
+          headers: { 'Content-Type' => 'application/json' },
+          body: payload.to_json)
+      end
+
+      def send_entry_feedback_info(payload)
         HTTP.post("#{base_path}/send/messageFromUserToOwner",
           headers: { 'Content-Type' => 'application/json' },
           body: payload.to_json)

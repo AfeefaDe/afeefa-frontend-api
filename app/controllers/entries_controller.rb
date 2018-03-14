@@ -28,10 +28,7 @@ class EntriesController < ApplicationController
     if success
       response = MessageApi::Client.notify_for_new_entry(model: model)
       unless 201 == response.status
-        message = 'error during sending new entry notification'
-        message << ': '
-        message << response.body
-        Rails.logger.warn message
+        generate_error_from_api(kind: 'new entry', message_from_api: response.body)
       end
       render plain: 'OK', status: :created
     else
@@ -43,37 +40,75 @@ class EntriesController < ApplicationController
       if model.contact_infos.first.try(:errors)
         errors << model.contact_infos.first.errors.full_messages.join("\n")
       end
-      errors = 'internal error' if errors.blank?
-
-      render plain: errors, status: :unprocessable_entity
+      if errors.blank?
+        errors = 'internal error'
+        render plain: errors, status: :internal_server_error
+      else
+        render plain: errors, status: :unprocessable_entity
+      end
     end
   end
 
   def contact_entry
-    case contact_entry_params[:type].to_s
-    when 'orgas'
-      model = Orga.find(contact_entry_params[:id])
-    when 'events'
-      model = Event.find(contact_entry_params[:id])
-    else
+    unless model = find_entry(type: contact_entry_params[:type], id: contact_entry_params[:id])
       render plain: 'invalid type', status: :unprocessable_entity
       return
     end
-    response = MessageApi::Client.send_contact_message(model: model, params: contact_entry_params.to_h)
+    response = MessageApi::Client.send_contact_message_for_entry(model: model, params: contact_entry_params.to_h)
     if 201 == response.status
       render plain: 'OK', status: :created
     else
-      message = 'error during sending contact mail'
-      message << ': '
-      message << response.body
-      Rails.logger.warn message
+      message = generate_error_from_api(kind: 'contact entry', message_from_api: response.body)
       render plain: message, status: :internal_server_error
+    end
+  end
+
+  def feedback_entry
+    unless model = find_entry(type: feedback_entry_params[:type], id: feedback_entry_params[:id])
+      render plain: 'invalid type', status: :unprocessable_entity
+      return
+    end
+
+    feedback_success = model.create_feedback(feedback_params: feedback_entry_params)
+
+    response = MessageApi::Client.send_feedback_message_for_entry(model: model, params: feedback_entry_params.to_h)
+    unless 201 == response.status
+      generate_error_from_api(kind: 'feedback entry', message_from_api: response.body)
+    end
+
+    if feedback_success
+      render plain: 'OK', status: :created
+    else
+      render plain: 'Could not create feedback for entry.', status: :internal_server_error
     end
   end
 
   private
 
+  def find_entry(type:, id:)
+    case type.to_s
+    when 'orgas'
+      Orga.find(id)
+    when 'events'
+      Event.find(id)
+    else
+      nil
+    end
+  end
+
+  def generate_error_from_api(kind:, message_from_api: nil)
+    message = "error during sending message for #{kind}"
+    message << ': '
+    message << message_from_api if message_from_api
+    Rails.logger.warn(message)
+    message
+  end
+
   def contact_entry_params
+    params.permit(:type, :id, :message, :author, :mail, :phone)
+  end
+
+  def feedback_entry_params
     params.permit(:type, :id, :message, :author, :mail, :phone)
   end
 

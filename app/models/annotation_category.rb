@@ -15,7 +15,15 @@ class AnnotationCategory < ApplicationRecord
     end
 
     def external_entry
-      @@entry ||= AnnotationCategory.where(title: 'EXTERNE EINTRAGUNG').last.freeze
+      @@external_entry ||= AnnotationCategory.where(title: 'EXTERNE EINTRAGUNG').last.freeze
+      raise 'annotation category for external_entry not found' unless @@external_entry
+      @@external_entry
+    end
+
+    def external_feedback
+      @@external_feedback ||= AnnotationCategory.where(title: 'EXTERNE ANMERKUNG').last.freeze
+      raise 'annotation category for external_feedback not found' unless @@external_feedback
+      @@external_feedback
     end
   end
 

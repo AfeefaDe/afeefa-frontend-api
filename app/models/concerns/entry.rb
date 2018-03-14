@@ -11,6 +11,30 @@ module Entry
     has_many :translation_caches, as: :cacheable, dependent: :destroy, class_name: 'TranslationCache'
 
     attr_accessor :type, :entry_type, :phone, :mail, :social_media, :web, :contact_person, :spoken_languages
+
+    def create_feedback(feedback_params:)
+      annotation_category = AnnotationCategory.external_feedback
+      annotation =
+        Annotation.create(
+          entry: self,
+          annotation_category: annotation_category,
+          detail: generate_feedback_message(feedback_params: feedback_params))
+
+      annotation_success = annotation && annotation.persisted?
+      unless annotation_success
+        Rails.logger.warn(
+          "feedback for entry [#{self.class}, #{self.id}] could not create annotation: " +
+            "#{annotation.inspect}, errors: #{annotation.errors.messages.inspect}")
+      end
+      annotation_success
+    end
+
+    private
+
+    def generate_feedback_message(feedback_params:)
+      "#{feedback_params[:message]}\n#{feedback_params[:author]} " +
+        "(#{[feedback_params[:mail], feedback_params[:phone]].join(', ')})"
+    end
   end
 
   module ClassMethods
