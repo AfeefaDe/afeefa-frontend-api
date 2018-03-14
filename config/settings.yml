@@ -5,6 +5,8 @@ cache:
 chapters_api_path: 'http://localhost:3010/chapters'
 backend_api:
   path: 'http://localhost:3000'
+frontend_ui:
+  path: 'http://localhost:8080'
 message_api:
   key: 'test123'
   path: 'http://localhost:3015'
