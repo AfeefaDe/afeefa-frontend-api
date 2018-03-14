@@ -10,4 +10,13 @@ class OrgaTest < ActiveSupport::TestCase
     assert json.key?('supportWantedDetail')
   end
 
+  test 'not save entry with duplicated title' do
+    assert orga = Orga.create(title: '123')
+
+    result = Orga.create_via_frontend(model_atrtibtues: { title: orga.title })
+    assert_not result[:success]
+    assert new_orga = result[:model]
+    assert_equal ['ist bereits vergeben'], new_orga.errors[:title]
+  end
+
 end

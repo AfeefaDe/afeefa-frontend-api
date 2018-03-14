@@ -19,32 +19,23 @@ module Entry
       model.parent_orga = Orga.root_orga
       model.state = :inactive
 
-      unless model.valid?
-        title_modified = false
-        tries = 1
-        while model.errors[:title].any? && (messages = model.errors[:title].join("\n")) &&
-          messages.include?('bereits vergeben') && (tries += 1) <= 10
-          title_modified = true
-          model.title << "_#{Time.current.to_i}"
-          model.valid?
-        end
-        if title_modified
-          annotation_category = AnnotationCategory.find_by(title: 'Titel ist bereits vergeben')
-          Annotation.create(entry: model, annotation_category: annotation_category,
-            detail: annotation_category.title)
-        end
-      end
-
       model_save_success = model.save
-      location = Location.new(location_attributes.merge(locatable: model))
-      contact_info = ContactInfo.new(contact_info_attributes.merge(contactable: model))
+      if location_attributes.present?
+        location = Location.new(location_attributes.merge(locatable: model))
+      end
+      if contact_info_attributes.present?
+        contact_info = ContactInfo.new(contact_info_attributes.merge(contactable: model))
+      end
 
       annotation_category = AnnotationCategory.external_entry
       Annotation.create(entry: model, annotation_category: annotation_category)
 
       {
         model: model,
-        success: model_save_success && location.save && contact_info.save
+        success:
+          model_save_success &&
+            (location_attributes.blank? || location.save) &&
+            (contact_info_attributes.blank? || contact_info.save)
       }
     end
   end
