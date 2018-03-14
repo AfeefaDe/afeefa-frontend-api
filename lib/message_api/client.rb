@@ -64,22 +64,22 @@ module MessageApi
 
       def backend_link(model)
         type =
-          case model.class
-          when Orga
+          case model.class.to_s
+          when 'Orga'
             'orgas'
-          when Event
+          when 'Event'
             'events'
           end
-        path = Settings.backend_api.path || 'https://backend.afeefa.de'
+        path = Settings.backend_ui.path || 'https://backend.afeefa.de'
         "#{path}/#{type}/#{model.id}"
       end
 
       def frontend_link(model)
         type =
-          case model.class
-          when Orga
+          case model.class.to_s
+          when 'Orga'
             'project'
-          when Event
+          when 'Event'
             'event'
           end
         path = Settings.frontend_ui.path || 'https://afeefa.de'
