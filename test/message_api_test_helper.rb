@@ -81,4 +81,25 @@ module MessageApiTestHelper
     message_api_response.expects(:body).returns(expected_body)
     Rails.logger.expects(:warn).with('error during sending message for feedback entry: response error')
   end
+
+  def assert_general_feedback_mail_success(message_api: nil, &block)
+    message_api ||= mock_message_api
+    message_api.expects(:send_general_feedback_info).with do |payload|
+      yield(payload) if block_given?
+      true
+    end.returns(message_api_response = mock_response_success)
+    message_api_response.expects(:body).never
+    Rails.logger.expects(:warn).never
+  end
+
+  def assert_general_feedback_mail_error(message_api: nil, &block)
+    message_api ||= mock_message_api
+    message_api.expects(:send_general_feedback_info).with do |payload|
+      yield(payload) if block_given?
+      true
+    end.returns(message_api_response = mock_response_error)
+    expected_body = message_api_response.body
+    message_api_response.expects(:body).returns(expected_body)
+    Rails.logger.expects(:warn).with('error during sending message for general feedback: response error')
+  end
 end

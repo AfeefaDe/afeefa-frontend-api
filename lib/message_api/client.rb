@@ -52,6 +52,17 @@ module MessageApi
         http_client.send_entry_feedback_info(payload)
       end
 
+      def send_general_feedback(params:)
+        params ||= {}
+
+        payload = {
+          key: api_key,
+          area: get_area_from_params(params) || 'dresden',
+        }.merge(params.except(:type, :id))
+
+        http_client.send_general_feedback_info(payload)
+      end
+
       private
 
       def http_client
@@ -100,6 +111,13 @@ module MessageApi
         Rails.logger.error exc.backtrace.join("\n")
         nil
       end
+
+      def get_area_from_params(params)
+        area = params[:area].try(:downcase)
+        if area && area.in?(Translation::AREAS)
+          area
+        end
+      end
     end
   end
 
@@ -120,6 +138,12 @@ module MessageApi
 
       def send_entry_feedback_info(payload)
         HTTP.post("#{base_path}/send/feedbackFromUserToAdmins",
+          headers: { 'Content-Type' => 'application/json' },
+          body: payload.to_json)
+      end
+
+      def send_general_feedback_info(payload)
+        HTTP.post("#{base_path}/send/generalFeedback",
           headers: { 'Content-Type' => 'application/json' },
           body: payload.to_json)
       end
