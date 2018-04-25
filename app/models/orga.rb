@@ -3,6 +3,7 @@ class Orga < ApplicationRecord
   include Entry
 
   ROOT_ORGA_TITLE = 'ROOT-ORGA'
+  ROOT_ORGA_DESCRIPTION = 'ROOT-DESCRIPTION'
 
   belongs_to :parent_orga, class_name: 'Orga', foreign_key: 'parent_orga_id'
 

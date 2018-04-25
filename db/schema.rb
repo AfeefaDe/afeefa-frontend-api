@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20180314142024) do
+ActiveRecord::Schema.define(version: 20180419144934) do
 
   create_table "actor_relations", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
     t.integer  "associating_actor_id"
@@ -18,7 +18,9 @@ ActiveRecord::Schema.define(version: 20180314142024) do
     t.string   "type"
     t.datetime "created_at",           null: false
     t.datetime "updated_at",           null: false
+    t.index ["associated_actor_id", "type"], name: "index_actor_relations_on_associated_actor_id_and_type", using: :btree
     t.index ["associated_actor_id"], name: "index_actor_relations_on_associated_actor_id", using: :btree
+    t.index ["associating_actor_id", "type"], name: "index_actor_relations_on_associating_actor_id_and_type", using: :btree
     t.index ["associating_actor_id"], name: "index_actor_relations_on_associating_actor_id", using: :btree
     t.index ["type"], name: "index_actor_relations_on_type", using: :btree
   end
@@ -40,14 +42,14 @@ ActiveRecord::Schema.define(version: 20180314142024) do
     t.index ["owner_type", "owner_id"], name: "index_addresses_on_owner_type_and_owner_id", using: :btree
   end
 
-  create_table "annotation_categories", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
+  create_table "annotation_categories", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
     t.string   "title"
     t.boolean  "generated_by_system", default: false, null: false
     t.datetime "created_at",                          null: false
     t.datetime "updated_at",                          null: false
   end
 
-  create_table "annotations", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
+  create_table "annotations", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
     t.integer "annotation_category_id"
     t.string  "entry_type"
     t.integer "entry_id"
@@ -56,14 +58,25 @@ ActiveRecord::Schema.define(version: 20180314142024) do
     t.index ["entry_type", "entry_id"], name: "index_annotations_on_entry_type_and_entry_id", using: :btree
   end
 
-  create_table "area_chapter_configs", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
+  create_table "area_chapter_configs", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
     t.string   "area"
     t.integer  "chapter_config_id"
     t.datetime "created_at",        null: false
     t.datetime "updated_at",        null: false
   end
 
-  create_table "categories", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
+  create_table "areas", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
+    t.string   "title"
+    t.string   "lat_min"
+    t.string   "lat_max"
+    t.string   "lon_min"
+    t.string   "lon_max"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["title"], name: "index_areas_on_title", unique: true, using: :btree
+  end
+
+  create_table "categories", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
     t.string   "title"
     t.integer  "parent_id"
     t.datetime "created_at",                     null: false
@@ -73,7 +86,7 @@ ActiveRecord::Schema.define(version: 20180314142024) do
     t.index ["parent_id"], name: "index_categories_on_parent_id", using: :btree
   end
 
-  create_table "chapter_configs", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
+  create_table "chapter_configs", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
     t.integer  "chapter_id"
     t.integer  "creator_id"
     t.integer  "last_modifier_id"
@@ -82,7 +95,7 @@ ActiveRecord::Schema.define(version: 20180314142024) do
     t.datetime "updated_at",       null: false
   end
 
-  create_table "chapters", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
+  create_table "chapters", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
     t.string   "title",                     null: false
     t.text     "content",     limit: 65535
     t.integer  "order"
@@ -93,7 +106,7 @@ ActiveRecord::Schema.define(version: 20180314142024) do
     t.index ["category_id"], name: "index_chapters_on_category_id", using: :btree
   end
 
-  create_table "contact_infos", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
+  create_table "contact_infos", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
     t.string   "contactable_type"
     t.integer  "contactable_id"
     t.datetime "created_at",                                       null: false
@@ -139,13 +152,22 @@ ActiveRecord::Schema.define(version: 20180314142024) do
     t.index ["owner_type", "owner_id"], name: "index_contacts_on_owner_type_and_owner_id", using: :btree
   end
 
-  create_table "entries", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
+  create_table "entries", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
     t.string  "entry_type"
     t.integer "entry_id"
     t.index ["entry_type", "entry_id"], name: "index_entries_on_entry_type_and_entry_id", using: :btree
   end
 
-  create_table "events", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
+  create_table "event_hosts", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
+    t.integer  "actor_id"
+    t.integer  "event_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["actor_id"], name: "index_event_hosts_on_actor_id", using: :btree
+    t.index ["event_id"], name: "index_event_hosts_on_event_id", using: :btree
+  end
+
+  create_table "events", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
     t.string   "title"
     t.text     "description",           limit: 65535
     t.text     "short_description",     limit: 65535
@@ -185,6 +207,17 @@ ActiveRecord::Schema.define(version: 20180314142024) do
     t.index ["sub_category_id"], name: "index_events_on_sub_category_id", using: :btree
   end
 
+  create_table "facet_item_owners", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
+    t.string   "owner_type"
+    t.integer  "owner_id"
+    t.integer  "facet_item_id"
+    t.datetime "created_at",    null: false
+    t.datetime "updated_at",    null: false
+    t.index ["facet_item_id"], name: "index_facet_item_owners_on_facet_item_id", using: :btree
+    t.index ["owner_type", "owner_id", "facet_item_id"], name: "facet_item_owner", unique: true, using: :btree
+    t.index ["owner_type", "owner_id"], name: "index_facet_item_owners_on_owner_type_and_owner_id", using: :btree
+  end
+
   create_table "facet_items", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
     t.string   "title"
     t.string   "color"
@@ -196,13 +229,57 @@ ActiveRecord::Schema.define(version: 20180314142024) do
     t.index ["parent_id"], name: "index_facet_items_on_parent_id", using: :btree
   end
 
+  create_table "facet_owner_types", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
+    t.integer "facet_id"
+    t.string  "owner_type"
+    t.index ["facet_id"], name: "index_facet_owner_types_on_facet_id", using: :btree
+  end
+
   create_table "facets", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
     t.string   "title"
+    t.string   "color"
+    t.boolean  "color_sub_items", default: true, null: false
+    t.datetime "created_at",                     null: false
+    t.datetime "updated_at",                     null: false
+  end
+
+  create_table "fe_navigation_item_facet_items", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
+    t.integer  "facet_item_id"
+    t.integer  "navigation_item_id"
+    t.datetime "created_at",         null: false
+    t.datetime "updated_at",         null: false
+    t.index ["facet_item_id"], name: "index_fe_navigation_item_facet_items_on_facet_item_id", using: :btree
+    t.index ["navigation_item_id"], name: "index_fe_navigation_item_facet_items_on_navigation_item_id", using: :btree
+  end
+
+  create_table "fe_navigation_item_owners", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
+    t.string   "owner_type"
+    t.integer  "owner_id"
+    t.integer  "navigation_item_id"
+    t.datetime "created_at",         null: false
+    t.datetime "updated_at",         null: false
+    t.index ["navigation_item_id"], name: "index_fe_navigation_item_owners_on_navigation_item_id", using: :btree
+    t.index ["owner_type", "owner_id"], name: "index_fe_navigation_item_owners_on_owner_type_and_owner_id", using: :btree
+  end
+
+  create_table "fe_navigation_items", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
+    t.string   "title"
+    t.string   "color"
+    t.integer  "navigation_id"
+    t.integer  "parent_id"
+    t.datetime "created_at",    null: false
+    t.datetime "updated_at",    null: false
+    t.index ["navigation_id"], name: "index_fe_navigation_items_on_navigation_id", using: :btree
+    t.index ["parent_id"], name: "index_fe_navigation_items_on_parent_id", using: :btree
+  end
+
+  create_table "fe_navigations", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
+    t.string   "area"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
   end
 
-  create_table "locations", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
+  create_table "locations", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
     t.string   "lat"
     t.string   "lon"
     t.string   "street"
@@ -223,7 +300,24 @@ ActiveRecord::Schema.define(version: 20180314142024) do
     t.index ["locatable_type", "locatable_id"], name: "index_locations_on_locatable_type_and_locatable_id", using: :btree
   end
 
-  create_table "orga_category_relations", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
+  create_table "offer_owners", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
+    t.integer  "actor_id"
+    t.integer  "offer_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["actor_id"], name: "index_offer_owners_on_actor_id", using: :btree
+    t.index ["offer_id"], name: "index_offer_owners_on_offer_id", using: :btree
+  end
+
+  create_table "offers", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
+    t.string   "title"
+    t.text     "description", limit: 65535
+    t.string   "area"
+    t.datetime "created_at",                null: false
+    t.datetime "updated_at",                null: false
+  end
+
+  create_table "orga_category_relations", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
     t.integer  "category_id"
     t.integer  "orga_id"
     t.boolean  "primary"
@@ -239,7 +333,7 @@ ActiveRecord::Schema.define(version: 20180314142024) do
     t.datetime "updated_at", null: false
   end
 
-  create_table "orgas", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
+  create_table "orgas", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
     t.integer  "orga_type_id"
     t.datetime "created_at",                                          null: false
     t.datetime "updated_at",                                          null: false
@@ -273,17 +367,7 @@ ActiveRecord::Schema.define(version: 20180314142024) do
     t.index ["sub_category_id"], name: "index_orgas_on_sub_category_id", using: :btree
   end
 
-  create_table "owner_facet_items", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
-    t.string   "owner_type"
-    t.integer  "owner_id"
-    t.integer  "facet_item_id"
-    t.datetime "created_at",    null: false
-    t.datetime "updated_at",    null: false
-    t.index ["facet_item_id"], name: "index_owner_facet_items_on_facet_item_id", using: :btree
-    t.index ["owner_type", "owner_id"], name: "index_owner_facet_items_on_owner_type_and_owner_id", using: :btree
-  end
-
-  create_table "owner_thing_relations", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
+  create_table "owner_thing_relations", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
     t.string   "ownable_type"
     t.integer  "ownable_id"
     t.string   "thingable_type"
@@ -294,7 +378,7 @@ ActiveRecord::Schema.define(version: 20180314142024) do
     t.index ["thingable_type", "thingable_id"], name: "index_owner_thing_relations_on_thingable_type_and_thingable_id", using: :btree
   end
 
-  create_table "resource_items", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
+  create_table "resource_items", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
     t.string   "title",              null: false
     t.string   "description"
     t.string   "tags"
@@ -308,7 +392,7 @@ ActiveRecord::Schema.define(version: 20180314142024) do
     t.index ["orga_id"], name: "index_resource_items_on_orga_id", using: :btree
   end
 
-  create_table "roles", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
+  create_table "roles", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
     t.string   "title"
     t.integer  "user_id"
     t.integer  "orga_id"
@@ -318,7 +402,7 @@ ActiveRecord::Schema.define(version: 20180314142024) do
     t.index ["user_id"], name: "index_roles_on_user_id", using: :btree
   end
 
-  create_table "thing_category_relations", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
+  create_table "thing_category_relations", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
     t.integer  "category_id"
     t.string   "catable_type"
     t.integer  "catable_id"
@@ -329,7 +413,7 @@ ActiveRecord::Schema.define(version: 20180314142024) do
     t.index ["category_id"], name: "index_thing_category_relations_on_category_id", using: :btree
   end
 
-  create_table "translation_caches", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
+  create_table "translation_caches", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
     t.integer  "cacheable_id"
     t.string   "cacheable_type",    limit: 20
     t.string   "language",          limit: 3,     null: false
@@ -341,7 +425,7 @@ ActiveRecord::Schema.define(version: 20180314142024) do
     t.index ["cacheable_id", "cacheable_type", "language"], name: "index_translation_cache", using: :btree
   end
 
-  create_table "users", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
+  create_table "users", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
     t.string   "email",                                default: "",      null: false
     t.string   "encrypted_password",                   default: "",      null: false
     t.string   "reset_password_token"

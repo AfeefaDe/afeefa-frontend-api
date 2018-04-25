@@ -14,13 +14,32 @@ module Seeds
     AnnotationCategory.delete_all
     Annotation.delete_all
 
+    Category.delete_all
+
+    # areas
+    Area.delete_all
+    Area.create!(title: 'dresden', lat_min: '50.811596', lat_max: '51.381457', lon_min: '12.983771', lon_max: '14.116620')
+    Area.create!(title: 'leipzig', lat_min: '51.169806', lat_max: '51.455225', lon_min: '12.174588', lon_max: '12.659360')
+    Area.create!(title: 'bautzen', lat_min: '51.001001', lat_max: '51.593835', lon_min: '13.710340', lon_max: '14.650444')
+
+    # orga types
+    OrgaType.delete_all
+    OrgaType.create!(name: 'Root')
+    OrgaType.create!(name: 'Organization')
+    OrgaType.create!(name: 'Project')
+    OrgaType.create!(name: 'Location')
+    OrgaType.create!(name: 'Network')
+
     # orgas
     if Orga.root_orga
       orga0 = Orga.root_orga
+      orga0.orga_type_id = OrgaType.where(name: 'Root').first['id']
       orga0.title = Orga::ROOT_ORGA_TITLE
+      orga0.description = Orga::ROOT_ORGA_DESCRIPTION
       orga0.save!(validate: false)
     else
-      orga0 = Orga.new(title: Orga::ROOT_ORGA_TITLE)
+      orga0 = Orga.new(title: Orga::ROOT_ORGA_TITLE, description: Orga::ROOT_ORGA_DESCRIPTION)
+      orga0.orga_type_id = OrgaType.where(name: 'Root').first['id']
       orga0.save!(validate: false)
     end
 
