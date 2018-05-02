@@ -2,4 +2,16 @@ changes:
   webhook_api_token: <%= ENV["FAPI_CHANGES_WEBHOOK_TOKEN"] %>
 cache:
   path: public/cache
-
+chapters_api_path: 'http://localhost:3010/chapters'
+backend_ui:
+  path: 'http://localhost:8080'
+frontend_ui:
+  path: 'http://localhost:8081'
+message_api:
+  key: 'test123'
+  path: 'http://localhost:3015'
+  templates:
+    new_entry:
+      to:
+        - foo@example.com
+      reply_to: []

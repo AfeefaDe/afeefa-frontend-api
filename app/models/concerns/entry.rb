@@ -11,6 +11,30 @@ module Entry
     has_many :translation_caches, as: :cacheable, dependent: :destroy, class_name: 'TranslationCache'
 
     attr_accessor :type, :entry_type, :phone, :mail, :social_media, :web, :contact_person, :spoken_languages
+
+    def create_feedback(feedback_params:)
+      annotation_category = AnnotationCategory.external_feedback
+      annotation =
+        Annotation.create(
+          entry: self,
+          annotation_category: annotation_category,
+          detail: generate_feedback_message(feedback_params: feedback_params))
+
+      annotation_success = annotation && annotation.persisted?
+      unless annotation_success
+        Rails.logger.warn(
+          "feedback for entry [#{self.class}, #{self.id}] could not create annotation: " +
+            "#{annotation.inspect}, errors: #{annotation.errors.messages.inspect}")
+      end
+      annotation_success
+    end
+
+    private
+
+    def generate_feedback_message(feedback_params:)
+      "#{feedback_params[:message]}\n#{feedback_params[:author]} " +
+        "(#{[feedback_params[:mail], feedback_params[:phone]].join(', ')})"
+    end
   end
 
   module ClassMethods
@@ -20,32 +44,31 @@ module Entry
       model.state = :inactive
 
       unless model.valid?
-        title_modified = false
         tries = 1
         while model.errors[:title].any? && (messages = model.errors[:title].join("\n")) &&
           messages.include?('bereits vergeben') && (tries += 1) <= 10
-          title_modified = true
           model.title << "_#{Time.current.to_i}"
           model.valid?
-        end
-        if title_modified
-          annotation_category = AnnotationCategory.find_by(title: 'Titel ist bereits vergeben')
-          Annotation.create(entry: model, annotation_category: annotation_category,
-            detail: annotation_category.title)
         end
       end
 
       model_save_success = model.save
-      location = Location.new(location_attributes.merge(locatable: model))
-      contact_info = ContactInfo.new(contact_info_attributes.merge(contactable: model))
+      if location_attributes.present?
+        location = Location.new(location_attributes.merge(locatable: model))
+      end
+      if contact_info_attributes.present?
+        contact_info = ContactInfo.new(contact_info_attributes.merge(contactable: model))
+      end
 
-      annotation_category = AnnotationCategory::EXTERNAL_ENTRY
-      Annotation.create(entry: model, annotation_category: annotation_category,
-        detail: annotation_category.title)
+      annotation_category = AnnotationCategory.external_entry
+      Annotation.create(entry: model, annotation_category: annotation_category)
 
       {
         model: model,
-        success: model_save_success && location.save && contact_info.save
+        success:
+          model_save_success &&
+            (location_attributes.blank? || location.save) &&
+            (contact_info_attributes.blank? || contact_info.save)
       }
     end
   end

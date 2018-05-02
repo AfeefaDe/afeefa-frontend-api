@@ -16,7 +16,7 @@ class CacheBuilder
 
       entry_found = false
       json_entries.map! do |jsonEntry|
-        if jsonEntry['id'].to_s == id.to_s
+        if jsonEntry['entryType'] == type.capitalize && jsonEntry['id'].to_s == id.to_s
           entry_found = true
           entry
         else
