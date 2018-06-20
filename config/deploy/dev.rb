@@ -7,7 +7,7 @@ server '178.238.229.190', user: 'ruby', roles: %w{app db web}#, my_property: :my
 # server 'example.com', user: 'deploy', roles: %w{app web}, other_property: :other_value
 # server 'db.example.com', user: 'deploy', roles: %w{db}
 
-set :deploy_to, '/home/ruby/afeefa-frontend-api'
+set :deploy_to, '/home/ruby/afeefa-frontend-api-dev'
 set :branch, 'dev'
 
 # role-based syntax
