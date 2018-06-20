@@ -66,6 +66,7 @@ group :development do
   # Use Capistrano for deployment
   gem 'capistrano-rails'
   gem 'capistrano', '~> 3.9.1'
+  gem 'capistrano-rbenv', '~> 2.1'
 end
 
 
