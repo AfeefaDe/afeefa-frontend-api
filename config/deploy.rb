@@ -75,7 +75,7 @@ namespace :deploy do
             else
               'frontend-dev-api'
             end
-        execute "sudo /bin/systemctl restart #{api}.service" # maybe we can use -h instead of -du
+        execute "sudo /bin/systemctl restart #{api}.service"
       end
     end
   end
@@ -90,7 +90,7 @@ namespace :deploy do
             else
               'frontend-dev-api'
             end
-        execute "sudo /bin/systemctl stop #{api}.service" # maybe we can use -h instead of -du
+        execute "sudo /bin/systemctl stop #{api}.service"
       end
     end
   end
@@ -105,7 +105,7 @@ namespace :deploy do
             else
               'frontend-dev-api'
             end
-        execute "sudo /bin/systemctl start #{api}.service" # maybe we can use -h instead of -du
+        execute "sudo /bin/systemctl start #{api}.service"
       end
     end
   end
