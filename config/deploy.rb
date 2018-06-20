@@ -73,7 +73,7 @@ namespace :deploy do
             if fetch(:stage).to_s == 'production'
               'frontend-api'
             else
-              'frontend-dev-api'
+              'frontend-api-dev'
             end
         execute "sudo /bin/systemctl restart #{api}.service"
       end
@@ -88,7 +88,7 @@ namespace :deploy do
             if fetch(:stage).to_s == 'production'
               'frontend-api'
             else
-              'frontend-dev-api'
+              'frontend-api-dev'
             end
         execute "sudo /bin/systemctl stop #{api}.service"
       end
@@ -103,7 +103,7 @@ namespace :deploy do
             if fetch(:stage).to_s == 'production'
               'frontend-api'
             else
-              'frontend-dev-api'
+              'frontend-api-dev'
             end
         execute "sudo /bin/systemctl start #{api}.service"
       end
