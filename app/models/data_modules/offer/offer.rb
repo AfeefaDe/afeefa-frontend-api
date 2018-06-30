@@ -18,7 +18,8 @@ module DataModules::Offer
         :id => self.id,
         :entryType => 'Offer',
         :type => 3,
-        :contact => self.contacts.first,
+
+        location: [],
         navigation_items: self.navigation_items.pluck(:id)
       }
     end

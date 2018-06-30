@@ -2,7 +2,8 @@ module DataModules::FeNavigation
   class FeNavigationItem < ApplicationRecord
 
     belongs_to :navigation, class_name: DataModules::FeNavigation::FeNavigation
-    has_many :sub_items, class_name: DataModules::FeNavigation::FeNavigationItem, foreign_key: :parent_id
+    belongs_to :parent, class_name: FeNavigationItem
+    has_many :sub_items, class_name: FeNavigationItem, foreign_key: :parent_id
     has_many :translation_caches, as: :cacheable, dependent: :destroy, class_name: 'TranslationCache'
 
     scope :by_area, -> (area) {
@@ -16,7 +17,8 @@ module DataModules::FeNavigation
 
     def as_json(*args)
       json = {
-        id: self.id
+        id: self.id,
+        icon: self.icon
       }
       unless self.parent_id
         json[:color] = self.color

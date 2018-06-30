@@ -5,18 +5,7 @@ FactoryGirl.define do
     area 'dresden'
     state 'active'
 
-    contact_infos { [build(:contact_info)] }
-    locations { [build(:location)] }
     association :category, factory: :category
-
-    after(:build) do |entry, evaluator|
-      entry.contact_infos.each do |ci|
-        ci.contactable = entry
-      end
-      entry.locations.each do |l|
-        l.locatable = entry
-      end
-    end
 
     after(:create) do |entry, evaluator|
       evaluator.translated_locales.each do |locale|

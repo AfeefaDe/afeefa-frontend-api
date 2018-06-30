@@ -6,8 +6,6 @@ module Entry
     belongs_to :category, optional: true
     belongs_to :sub_category, class_name: 'Category', optional: true
 
-    has_many :locations, as: :locatable
-    has_many :contact_infos, as: :contactable
     has_many :contacts, class_name: DataPlugins::Contact::Contact, as: :owner
     has_many :translation_caches, as: :cacheable, class_name: 'TranslationCache'
 
@@ -50,8 +48,8 @@ module Entry
         :contacts,
         :parent_orga,
         :navigation_items,
-        contacts: [:contact_persons, :location],
-        parent_orga: :contact_infos]
+        contacts: [:contact_persons, :location]
+      ]
     end
 
     def create_via_frontend(model_atrtibtues:, contact_info_attributes: nil, location_attributes: nil)
@@ -69,11 +67,51 @@ module Entry
       end
 
       model_save_success = model.save
-      if location_attributes.present?
-        location = Location.new(location_attributes.merge(locatable: model))
-      end
+
+      contact = nil
+
       if contact_info_attributes.present?
-        contact_info = ContactInfo.new(contact_info_attributes.merge(contactable: model))
+        contact_create_params = {
+          web: contact_info_attributes['web'],
+          social_media: contact_info_attributes['social_media'],
+          spoken_languages: contact_info_attributes['spoken_languages'],
+          owner_id: model.id,
+          owner_type: model.class.name
+        }
+
+        contact = DataPlugins::Contact::Contact.create(contact_create_params)
+
+        if contact_info_attributes['contact_person'].present? ||
+          contact_info_attributes['mail'].present? ||
+          contact_info_attributes['phone'].present?
+
+          contact_person = DataPlugins::Contact::ContactPerson.create({
+            name: contact_info_attributes['contact_person'],
+            mail: contact_info_attributes['mail'],
+            phone: contact_info_attributes['phone'],
+            contact_id: contact.id
+          })
+        end
+      end
+
+      if location_attributes.present?
+        unless contact
+          contact = DataPlugins::Contact::Contact.new(
+            owner_id: model.id,
+            owner_type: model.class.name
+          )
+        end
+
+        location_create_params = location_attributes.merge(
+          title: location_attributes.delete(:placename),
+          contact_id: contact.id,
+          owner_id: model.id,
+          owner_type: model.class.name
+        )
+
+        location = DataPlugins::Location::Location.create!(location_create_params)
+        contact.location = location
+        contact.save
       end
 
       annotation_category = AnnotationCategory.external_entry
@@ -83,89 +121,74 @@ module Entry
         model: model,
         success:
           model_save_success &&
-            (location_attributes.blank? || location.save) &&
-            (contact_info_attributes.blank? || contact_info.save)
+            (location_attributes.blank? || location.id) &&
+            (contact_info_attributes.blank? || contact.id)
       }
     end
   end
 
   def as_json(*args)
+    contact = self.contacts.first
+    location = contact && contact.location
     parent_orga = self.parent_orga
 
-    # trans_title, trans_description, trans_short_description = nil
+    if location && contact
+      location.openingHours = contact.opening_hours
+    end
 
-    # locale = args[0][:language]
-    # if locale != Translation::DEFAULT_LOCALE
-    #   translation = translation_caches.find_by(language: locale)
-    #   if translation
-    #     trans_title = translation[:title]
-    #     trans_description = translation[:description]
-    #     trans_short_description = translation[:short_description]
-    #   else
-    #     Rails.logger.warn "no translations found for #{entry_type} #{id} locale #{locale}"
-    #   end
-    # end
+    if contact && contact.contact_persons.first
+      self.social_media = contact.social_media
+      self.web = contact.web
+      self.spoken_languages = contact.spoken_languages
 
-    # if parent_orga
-    #   [:short_description].each do |attribute|
-    #     if self.inheritance && self.inheritance.include?('short_description')
-    #       if (parent_attribute = parent_orga.send(attribute))
-    #         self.send("#{attribute}=",
-    #           [parent_attribute, self.send(attribute)].join("\n\n"))
-    #       end
-    #     end
-    #   end
+      contact_person = contact.contact_persons.first
+      if contact_person
+        self.phone = contact_person.phone
+        self.mail = contact_person.mail
+        self.contact_person = contact_person.name
+      end
+    end
 
-    #   [:description].each do |attribute|
-    #     if send(attribute).blank?
-    #       if (parent_attribute = parent_orga.send(attribute))
-    #         self.send("#{attribute}=", parent_attribute)
-    #       end
-    #     end
-    #   end
-
-    #   if parent_orga.contact_infos.first
-    #     if contact
-    #       [:mail, :phone, :contact_person, :web, :social_media, :spoken_languages].each do |attribute|
-    #         if send(attribute).blank?
-    #           if (parent_attribute = parent_orga.contact_infos.first.send(attribute))
-    #             self.send("#{attribute}=", parent_attribute)
-    #           end
-    #         end
-    #       end
-    #     else
-    #       contact = parent_orga.contact_infos.first
-    #       self.phone = contact.phone
-    #       self.mail = contact.mail
-    #       self.social_media = contact.social_media
-    #       self.web = contact.web
-    #       self.contact_person = contact.contact_person
-    #       self.spoken_languages = contact.spoken_languages
-    #     end
-    #   end
-
-    # end
-
+    sub_navigation_item = navigation_items.where.not(parent_id: nil).first
+    if sub_navigation_item
+      navigation_item = sub_navigation_item.parent
+    else
+      navigation_item = navigation_items.first
+    end
     {
       id: self.id,
       entryType: self.entry_type,
-      category: self.category ? self.category.title : '',
+
+      navigationId: navigation_item ? navigation_item.id : nil,
+      subNavigationId: sub_navigation_item ? sub_navigation_item.id : nil,
+
+      category: self.category,
       subCategory: self.sub_category ? self.sub_category.title : '',
+
       certified: self.certified_sfr,
-      # description: trans_description || self.description,
-      # descriptionShort: trans_short_description || self.short_description,
       entryId: self.legacy_entry_id,
       image: self.media_url,
       imageType: self.media_type,
-      # name: trans_title || self.title || '',
       supportWanted: self.support_wanted,
       supportWantedDetail: self.support_wanted_detail,
       tags: self.tags || '',
       type: self.type,
       created_at: self.created_at,
       updated_at: self.updated_at,
-      contact: self.contacts.first,
-      navigation_items: self.navigation_items.pluck(:id)
+
+      navigation_items: self.navigation_items.pluck(:id),
+
+      # contact params
+      facebook: self.social_media || '',
+      web: self.web || '',
+      spokenLanguages: self.spoken_languages || '',
+
+      # contact person params
+      speakerPublic: self.contact_person || '',
+      mail: self.mail || '',
+      phone: self.phone || '',
+
+      location: location ? [location] : []
     }
   end
 end

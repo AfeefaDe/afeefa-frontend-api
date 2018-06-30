@@ -34,11 +34,11 @@ class EntriesController < ApplicationController
     else
       errors = ''
       errors << model.errors.full_messages.join("\n")
-      if model.locations.first.try(:errors)
-        errors << model.locations.first.errors.full_messages.join("\n")
+      if model.contacts.first.try(:errors)
+        errors << model.contacts.first.errors.full_messages.join("\n")
       end
-      if model.contact_infos.first.try(:errors)
-        errors << model.contact_infos.first.errors.full_messages.join("\n")
+      if model.contacts.first && model.contacts.first.location.try(:errors)
+        errors << model.locations.first.errors.full_messages.join("\n")
       end
       if errors.blank?
         errors = 'internal error'

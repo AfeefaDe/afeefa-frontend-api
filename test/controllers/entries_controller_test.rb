@@ -119,10 +119,19 @@ class EntriesControllerTest < ActionController::TestCase
     end
     assert_equal title = orga_params['marketentry']['name'], Orga.last.title
     assert_equal 'inactive', Orga.last.state
-    placename = orga_params['location']['placename']
-    assert_equal placename, Orga.last.locations.last.placename
-    contact_person = orga_params['marketentry']['speakerPublic']
-    assert_equal contact_person, Orga.last.contact_infos.last.contact_person
+
+    assert_equal orga_params['location']['placename'], Orga.last.contacts.first.location.title
+    assert_equal orga_params['location']['street'], Orga.last.contacts.first.location.street
+    assert_equal orga_params['location']['zip'], Orga.last.contacts.first.location.zip
+    assert_equal orga_params['location']['city'], Orga.last.contacts.first.location.city
+
+    assert_equal orga_params['marketentry']['web'], Orga.last.contacts.first.web
+    assert_equal orga_params['marketentry']['facebook'], Orga.last.contacts.first.social_media
+
+    assert_equal orga_params['marketentry']['speakerPublic'], Orga.last.contacts.first.contact_persons.first.name
+    assert_equal orga_params['marketentry']['mail'], Orga.last.contacts.first.contact_persons.first.mail
+    assert_equal orga_params['marketentry']['phone'], Orga.last.contacts.first.contact_persons.first.phone
+
     assert_equal 1, Annotation.where(entry: Orga.last).count
     assert_equal AnnotationCategory.external_entry, Annotation.where(entry: Orga.last).last.annotation_category
 
@@ -182,9 +191,9 @@ class EntriesControllerTest < ActionController::TestCase
     assert_equal title = orga_params['marketentry']['name'], Orga.last.title
     assert_equal 'inactive', Orga.last.state
     placename = orga_params['location']['placename']
-    assert_equal placename, Orga.last.locations.last.placename
+    assert_equal placename, Orga.last.contacts.first.location.title
     contact_person = orga_params['marketentry']['speakerPublic']
-    assert_equal contact_person, Orga.last.contact_infos.last.contact_person
+    assert_equal contact_person, Orga.last.contacts.first.contact_persons.first.name
     assert_equal 1, Annotation.where(entry: Orga.last).count
     assert_equal AnnotationCategory.external_entry, Annotation.where(entry: Orga.last).last.annotation_category
 
@@ -236,10 +245,18 @@ class EntriesControllerTest < ActionController::TestCase
     event = Event.unscoped.last
     assert_equal title = event_params['marketentry']['name'], event.title
     assert_equal 'inactive', event.state
-    placename = event_params['location']['placename']
-    assert_equal placename, event.locations.last.placename
-    contact_person = event_params['marketentry']['speakerPublic']
-    assert_equal contact_person, event.contact_infos.last.contact_person
+
+    assert_equal event_params['location']['placename'], event.contacts.first.location.title
+    assert_equal event_params['location']['street'], event.contacts.first.location.street
+    assert_equal event_params['location']['zip'], event.contacts.first.location.zip
+    assert_equal event_params['location']['city'], event.contacts.first.location.city
+
+    assert_equal event_params['marketentry']['web'], event.contacts.first.web
+    assert_equal event_params['marketentry']['facebook'], event.contacts.first.social_media
+
+    assert_equal event_params['marketentry']['speakerPublic'], event.contacts.first.contact_persons.first.name
+    assert_equal event_params['marketentry']['mail'], event.contacts.first.contact_persons.first.mail
+    assert_equal event_params['marketentry']['phone'], event.contacts.first.contact_persons.first.phone
 
     Time.freeze do
       assert_difference -> { Event.unscoped.count } do

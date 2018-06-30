@@ -2,16 +2,18 @@ module DataPlugins::Location
   class Location < ApplicationRecord
     self.table_name = 'addresses'
 
+    attr_accessor :openingHours
+
     def as_json(*args)
       {
         id: self.id,
-        title: self.title || '',
+        placename: self.title || '',
         street: self.street || '',
         zip: self.zip || '',
         city: self.city || '',
         lat: self.lat || '',
         lon: self.lon || '',
-        directions: self.directions || ''
+        arrival: self.directions || ''
       }
     end
   end

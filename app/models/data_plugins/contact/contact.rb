@@ -4,7 +4,7 @@ module DataPlugins::Contact
     self.inheritance_column = :_type_disabled
 
     has_many :contact_persons, class_name: DataPlugins::Contact::ContactPerson
-    belongs_to :location, class_name: DataPlugins::Location::Location
+    belongs_to :location, class_name: DataPlugins::Location::Location, optional: true
 
     def as_json(*args)
       {
