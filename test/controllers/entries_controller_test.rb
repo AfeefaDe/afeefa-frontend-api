@@ -8,10 +8,10 @@ class EntriesControllerTest < ActionController::TestCase
   setup do
     @message_api = mock_message_api
 
-    orga = create(:orga, title: 'orga.1.title', area: 'dresden', translated_locales: ['en'])
-    @event = create(:event, title: 'event.1.title', area: 'dresden', parent_orga: orga)
-    event2 = create(:event, title: 'event.2.title', area: 'dresden')
-    orga2 = create(:orga, title: 'orga.2.title', area: 'bautzen')
+    @orga = create(:orga, title: 'orga.1.title', area: 'dresden', translated_locales: ['en'])
+    @event = create(:event, title: 'event.1.title', area: 'dresden', parent_orga: @orga)
+    @event2 = create(:event, title: 'event.2.title', area: 'dresden')
+    @orga2 = create(:orga, title: 'orga.2.title', area: 'bautzen')
 
     silence_warnings do
       @old_locales = Translation::TRANSLATABLE_LOCALES
@@ -33,7 +33,7 @@ class EntriesControllerTest < ActionController::TestCase
     get :index, params: { area: 'dresden', locale: 'de' }
     assert_response :ok
     json = JSON.parse(response.body)
-    assert event = json['marketentries'].last
+    assert event = json['events'].last
     assert event.key?('dateFrom')
     assert event.key?('timeFrom')
     assert event.key?('dateTo')
@@ -44,44 +44,53 @@ class EntriesControllerTest < ActionController::TestCase
     get :index, params: { area: 'dresden', locale: 'de' }
     assert_response :ok
     json = JSON.parse(response.body)
-    assert_equal 4, json['marketentries'].size
-    assert_equal 'orga.1.title', json['marketentries'][0]['name']
-    assert_equal 'event.2.title', json['marketentries'][3]['name']
+    assert_equal 2, json['orgas'].size
+    assert_equal 2, json['events'].size
+    assert_equal @orga.id, json['orgas'][0]['id']
+    assert_equal @event2.parent_orga.id, json['orgas'][1]['id']
+    assert_equal @event2.id, json['events'][1]['id']
   end
 
   test 'should get dresden/de by default' do
     get :index
     assert_response :ok
     json = JSON.parse(response.body)
-    assert_equal 4, json['marketentries'].size
-    assert_equal 'orga.1.title', json['marketentries'][0]['name']
-    assert_equal 'event.2.title', json['marketentries'][3]['name']
+    assert_equal 2, json['orgas'].size
+    assert_equal 2, json['events'].size
+    assert_equal @orga.id, json['orgas'][0]['id']
+    assert_equal @event2.parent_orga.id, json['orgas'][1]['id']
+    assert_equal @event2.id, json['events'][1]['id']
   end
 
   test 'should get dresden/en' do
     get :index, params: { area: 'dresden', locale: 'en' }
     assert_response :ok
     json = JSON.parse(response.body)
-    assert_equal 4, json['marketentries'].size
-    assert_equal 'orga.1.title_en', json['marketentries'][0]['name']
-    assert_equal 'event.2.title', json['marketentries'][3]['name']
+    assert_equal 2, json['orgas'].size
+    assert_equal 2, json['events'].size
+    assert_equal @orga.id, json['orgas'][0]['id']
+    assert_equal @event2.parent_orga.id, json['orgas'][1]['id']
+    assert_equal @event2.id, json['events'][1]['id']
   end
 
   test 'should get bautzen' do
     get :index, params: { area: 'bautzen' }
     assert_response :ok
     json = JSON.parse(response.body)
-    assert_equal 1, json['marketentries'].size
-    assert_equal 'orga.2.title', json['marketentries'][0]['name']
+    assert_equal 1, json['orgas'].size
+    assert_equal 0, json['events'].size
+    assert_equal @orga2.id, json['orgas'][0]['id']
   end
 
   test 'should fallback to dresden/de' do
     get :index, params: { area: 'frauenthal', locale: 'foo' }
     assert_response :ok
     json = JSON.parse(response.body)
-    assert_equal 4, json['marketentries'].size
-    assert_equal 'orga.1.title', json['marketentries'][0]['name']
-    assert_equal 'event.2.title', json['marketentries'][3]['name']
+    assert_equal 2, json['orgas'].size
+    assert_equal 2, json['events'].size
+    assert_equal @orga.id, json['orgas'][0]['id']
+    assert_equal @event2.parent_orga.id, json['orgas'][1]['id']
+    assert_equal @event2.id, json['events'][1]['id']
   end
 
   test 'should create orga' do

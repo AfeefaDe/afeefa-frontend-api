@@ -68,6 +68,19 @@ class ChangeControllerTest < ActionController::TestCase
     end
   end
 
+  it 'should trigger cache builder on entry delete request without area' do
+    CacheBuilder.any_instance.expects(:remove_entry).with(nil, 'facet_item', '123')
+
+    perform_enqueued_jobs do
+      get :update, params: {
+        token: Settings.changes.webhook_api_token,
+        type: 'facet_item',
+        id: 123,
+        deleted: true
+      }
+    end
+  end
+
   private
 
   def cache_builder

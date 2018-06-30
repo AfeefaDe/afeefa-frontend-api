@@ -10,6 +10,8 @@ class Orga < ApplicationRecord
   scope :without_root, -> {
     where.not(title: ROOT_ORGA_TITLE)
   }
+  scope :active, -> { where(state: 'active') }
+  scope :for_json, -> { without_root.active }
   default_scope { without_root }
 
   # HOOKS

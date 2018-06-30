@@ -11,6 +11,8 @@ class Event < ApplicationRecord
     where('date_start >= ?', now).
     or(where('date_end >= ?', now))
   }
+  scope :active, -> { where(state: 'active') }
+  scope :for_json, -> { upcoming.active }
   default_scope { upcoming }
 
   after_initialize do |entry|

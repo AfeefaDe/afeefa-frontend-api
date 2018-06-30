@@ -188,7 +188,7 @@ class EntriesController < ApplicationController
   end
 
   def render_data(locale, area)
-    cache_file_path = File.join(CacheBuilder::CACHE_PATH, "#{area}-#{locale}.json").to_s
+    cache_file_path = File.join(CacheBuilder::CACHE_PATH, "entries-#{area}.json").to_s
     send_file cache_file_path, type: 'application/json', disposition: 'inline'
   end
 
