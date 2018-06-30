@@ -2,7 +2,7 @@ module DataModules::FeNavigation
   class FeNavigationItem < ApplicationRecord
 
     belongs_to :navigation, class_name: DataModules::FeNavigation::FeNavigation
-    belongs_to :parent, class_name: FeNavigationItem
+    belongs_to :parent, class_name: FeNavigationItem, optional: true
     has_many :sub_items, class_name: FeNavigationItem, foreign_key: :parent_id
     has_many :translation_caches, as: :cacheable, dependent: :destroy, class_name: 'TranslationCache'
 
