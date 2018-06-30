@@ -8,7 +8,12 @@ module Entry
 
     has_many :locations, as: :locatable
     has_many :contact_infos, as: :contactable
-    has_many :translation_caches, as: :cacheable, dependent: :destroy, class_name: 'TranslationCache'
+    has_many :contacts, class_name: DataPlugins::Contact::Contact, as: :owner
+    has_many :translation_caches, as: :cacheable, class_name: 'TranslationCache'
+
+    has_many :navigation_item_owners,
+      class_name: DataModules::FeNavigation::FeNavigationItemOwner, as: :owner
+    has_many :navigation_items, through: :navigation_item_owners
 
     attr_accessor :type, :entry_type, :phone, :mail, :social_media, :web, :contact_person, :spoken_languages
 
@@ -39,7 +44,14 @@ module Entry
 
   module ClassMethods
     def default_includes
-      [:category, :sub_category, :locations, :contact_infos, :parent_orga, parent_orga: :contact_infos]
+      [
+        :category,
+        :sub_category,
+        :contacts,
+        :parent_orga,
+        :navigation_items,
+        contacts: [:contact_persons, :location],
+        parent_orga: :contact_infos]
     end
 
     def create_via_frontend(model_atrtibtues:, contact_info_attributes: nil, location_attributes: nil)
@@ -78,8 +90,6 @@ module Entry
   end
 
   def as_json(*args)
-    location = self.locations.first
-    contact = self.contact_infos.first
     parent_orga = self.parent_orga
 
     # trans_title, trans_description, trans_short_description = nil
@@ -95,26 +105,6 @@ module Entry
     #     Rails.logger.warn "no translations found for #{entry_type} #{id} locale #{locale}"
     #   end
     # end
-
-    if location && contact
-      location.openingHours = contact.opening_hours
-    end
-
-    inheritance = self.inheritance || ''
-    inheritance = {
-      short_description: inheritance.include?('short_description'),
-      contact_infos: inheritance.include?('contact_infos'),
-      locations: inheritance.include?('locations')
-    }
-
-    if contact
-      self.phone = contact.phone
-      self.mail = contact.mail
-      self.social_media = contact.social_media
-      self.web = contact.web
-      self.contact_person = contact.contact_person
-      self.spoken_languages = contact.spoken_languages
-    end
 
     # if parent_orga
     #   [:short_description].each do |attribute|
@@ -165,23 +155,17 @@ module Entry
       # description: trans_description || self.description,
       # descriptionShort: trans_short_description || self.short_description,
       entryId: self.legacy_entry_id,
-      facebook: self.social_media || '',
       image: self.media_url,
       imageType: self.media_type,
-      location: self.locations,
-      mail: self.mail || '',
       # name: trans_title || self.title || '',
-      phone: self.phone || '',
-      speakerPublic: self.contact_person || '',
-      spokenLanguages: self.spoken_languages || '',
       supportWanted: self.support_wanted,
       supportWantedDetail: self.support_wanted_detail,
       tags: self.tags || '',
       type: self.type,
-      web: self.web || '',
-      inheritance: inheritance,
       created_at: self.created_at,
-      updated_at: self.updated_at
+      updated_at: self.updated_at,
+      contact: self.contacts.first,
+      navigation_items: self.navigation_items.pluck(:id)
     }
   end
 end
