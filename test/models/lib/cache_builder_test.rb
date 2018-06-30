@@ -513,7 +513,7 @@ class CacheBuilderTest < ActiveSupport::TestCase
       json = JSON.parse(file)
       assert_equal 2, json['orgas'].length
       assert_equal 5, json['facet_items'].length
-      assert_equal 1, json['navigation_items'].length
+      assert_equal 5, json['navigation_items'].length
       assert_equal 'orga.1.title', json['orgas'][0]['title']
       assert_equal 'orga.3.title', json['orgas'][1]['title']
     end
