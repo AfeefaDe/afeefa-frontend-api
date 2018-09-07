@@ -18,7 +18,7 @@ module DataModules::Offer
     scope :for_json, -> { }
 
     after_initialize do |entry|
-      entry.type = 3
+      entry.type = 1
       entry.entry_type = 'Offer'
       entry.media_url = entry.image_url
       entry.media_type = entry.image_url ? 'image' : nil
