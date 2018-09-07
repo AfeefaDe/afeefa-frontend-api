@@ -161,9 +161,7 @@ module Entry
 
       navigationId: navigation_item ? navigation_item.id : nil,
       subNavigationId: sub_navigation_item ? sub_navigation_item.id : nil,
-
-      category: self.category,
-      subCategory: self.sub_category ? self.sub_category.title : '',
+      navigation_items: self.navigation_items.pluck(:id),
 
       certified: self.certified_sfr,
       entryId: self.legacy_entry_id,
@@ -175,8 +173,6 @@ module Entry
       type: self.type,
       created_at: self.created_at,
       updated_at: self.updated_at,
-
-      navigation_items: self.navigation_items.pluck(:id),
 
       # contact params
       facebook: self.social_media || '',
