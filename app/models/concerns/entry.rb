@@ -6,7 +6,7 @@ module Entry
     belongs_to :category, optional: true
     belongs_to :sub_category, class_name: 'Category', optional: true
 
-    has_many :contacts, class_name: DataPlugins::Contact::Contact, as: :owner
+    belongs_to :linked_contact, class_name: DataPlugins::Contact::Contact, foreign_key: :contact_id
     has_many :translation_caches, as: :cacheable, class_name: 'TranslationCache'
 
     has_many :navigation_item_owners,
@@ -45,10 +45,10 @@ module Entry
       [
         :category,
         :sub_category,
-        :contacts,
+        :linked_contact,
         :parent_orga,
         :navigation_items,
-        contacts: [:contact_persons, :location]
+        linked_contact: [:contact_persons, :location]
       ]
     end
 
@@ -128,7 +128,7 @@ module Entry
   end
 
   def as_json(*args)
-    contact = self.contacts.first
+    contact = self.linked_contact
     location = contact && contact.location
     parent_orga = self.parent_orga
 
