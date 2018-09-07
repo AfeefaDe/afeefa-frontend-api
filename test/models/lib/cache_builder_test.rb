@@ -51,7 +51,7 @@ class CacheBuilderTest < ActiveSupport::TestCase
     assert_equal 1, json['offers'].length
     assert_equal orga.id, json['orgas'][0]['id']
     assert_equal orga2.id, json['orgas'][1]['id']
-    assert_equal event.parent_orga.id, json['orgas'][2]['id']
+    assert_equal event.hosts.first.id, json['orgas'][2]['id']
     assert_equal event.id, json['events'][0]['id']
     assert_equal offer.id, json['offers'][0]['id']
   end

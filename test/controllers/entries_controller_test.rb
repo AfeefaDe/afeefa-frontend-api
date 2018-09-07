@@ -9,7 +9,7 @@ class EntriesControllerTest < ActionController::TestCase
     @message_api = mock_message_api
 
     @orga = create(:orga, title: 'orga.1.title', area: 'dresden', translated_locales: ['en'])
-    @event = create(:event, title: 'event.1.title', area: 'dresden', parent_orga: @orga)
+    @event = create(:event, title: 'event.1.title', area: 'dresden', hosts: [@orga])
     @event2 = create(:event, title: 'event.2.title', area: 'dresden')
     @orga2 = create(:orga, title: 'orga.2.title', area: 'bautzen')
 
@@ -47,7 +47,7 @@ class EntriesControllerTest < ActionController::TestCase
     assert_equal 2, json['orgas'].size
     assert_equal 2, json['events'].size
     assert_equal @orga.id, json['orgas'][0]['id']
-    assert_equal @event2.parent_orga.id, json['orgas'][1]['id']
+    assert_equal @event2.hosts.first.id, json['orgas'][1]['id']
     assert_equal @event2.id, json['events'][1]['id']
   end
 
@@ -58,7 +58,7 @@ class EntriesControllerTest < ActionController::TestCase
     assert_equal 2, json['orgas'].size
     assert_equal 2, json['events'].size
     assert_equal @orga.id, json['orgas'][0]['id']
-    assert_equal @event2.parent_orga.id, json['orgas'][1]['id']
+    assert_equal @event2.hosts.first.id, json['orgas'][1]['id']
     assert_equal @event2.id, json['events'][1]['id']
   end
 
@@ -69,7 +69,7 @@ class EntriesControllerTest < ActionController::TestCase
     assert_equal 2, json['orgas'].size
     assert_equal 2, json['events'].size
     assert_equal @orga.id, json['orgas'][0]['id']
-    assert_equal @event2.parent_orga.id, json['orgas'][1]['id']
+    assert_equal @event2.hosts.first.id, json['orgas'][1]['id']
     assert_equal @event2.id, json['events'][1]['id']
   end
 
@@ -89,7 +89,7 @@ class EntriesControllerTest < ActionController::TestCase
     assert_equal 2, json['orgas'].size
     assert_equal 2, json['events'].size
     assert_equal @orga.id, json['orgas'][0]['id']
-    assert_equal @event2.parent_orga.id, json['orgas'][1]['id']
+    assert_equal @event2.hosts.first.id, json['orgas'][1]['id']
     assert_equal @event2.id, json['events'][1]['id']
   end
 
@@ -120,17 +120,20 @@ class EntriesControllerTest < ActionController::TestCase
     assert_equal title = orga_params['marketentry']['name'], Orga.last.title
     assert_equal 'inactive', Orga.last.state
 
-    assert_equal orga_params['location']['placename'], Orga.last.contacts.first.location.title
-    assert_equal orga_params['location']['street'], Orga.last.contacts.first.location.street
-    assert_equal orga_params['location']['zip'], Orga.last.contacts.first.location.zip
-    assert_equal orga_params['location']['city'], Orga.last.contacts.first.location.city
+    assert_equal Orga.last.linked_contact, Orga.last.contacts.first
+    assert_equal Orga.last.linked_contact.location, Orga.last.locations.first
 
-    assert_equal orga_params['marketentry']['web'], Orga.last.contacts.first.web
-    assert_equal orga_params['marketentry']['facebook'], Orga.last.contacts.first.social_media
+    assert_equal orga_params['location']['placename'], Orga.last.linked_contact.location.title
+    assert_equal orga_params['location']['street'], Orga.last.linked_contact.location.street
+    assert_equal orga_params['location']['zip'], Orga.last.linked_contact.location.zip
+    assert_equal orga_params['location']['city'], Orga.last.linked_contact.location.city
 
-    assert_equal orga_params['marketentry']['speakerPublic'], Orga.last.contacts.first.contact_persons.first.name
-    assert_equal orga_params['marketentry']['mail'], Orga.last.contacts.first.contact_persons.first.mail
-    assert_equal orga_params['marketentry']['phone'], Orga.last.contacts.first.contact_persons.first.phone
+    assert_equal orga_params['marketentry']['web'], Orga.last.linked_contact.web
+    assert_equal orga_params['marketentry']['facebook'], Orga.last.linked_contact.social_media
+
+    assert_equal orga_params['marketentry']['speakerPublic'], Orga.last.linked_contact.contact_persons.first.name
+    assert_equal orga_params['marketentry']['mail'], Orga.last.linked_contact.contact_persons.first.mail
+    assert_equal orga_params['marketentry']['phone'], Orga.last.linked_contact.contact_persons.first.phone
 
     assert_equal 1, Annotation.where(entry: Orga.last).count
     assert_equal AnnotationCategory.external_entry, Annotation.where(entry: Orga.last).last.annotation_category
@@ -191,9 +194,9 @@ class EntriesControllerTest < ActionController::TestCase
     assert_equal title = orga_params['marketentry']['name'], Orga.last.title
     assert_equal 'inactive', Orga.last.state
     placename = orga_params['location']['placename']
-    assert_equal placename, Orga.last.contacts.first.location.title
+    assert_equal placename, Orga.last.linked_contact.location.title
     contact_person = orga_params['marketentry']['speakerPublic']
-    assert_equal contact_person, Orga.last.contacts.first.contact_persons.first.name
+    assert_equal contact_person, Orga.last.linked_contact.contact_persons.first.name
     assert_equal 1, Annotation.where(entry: Orga.last).count
     assert_equal AnnotationCategory.external_entry, Annotation.where(entry: Orga.last).last.annotation_category
 
@@ -246,17 +249,17 @@ class EntriesControllerTest < ActionController::TestCase
     assert_equal title = event_params['marketentry']['name'], event.title
     assert_equal 'inactive', event.state
 
-    assert_equal event_params['location']['placename'], event.contacts.first.location.title
-    assert_equal event_params['location']['street'], event.contacts.first.location.street
-    assert_equal event_params['location']['zip'], event.contacts.first.location.zip
-    assert_equal event_params['location']['city'], event.contacts.first.location.city
+    assert_equal event_params['location']['placename'], event.linked_contact.location.title
+    assert_equal event_params['location']['street'], event.linked_contact.location.street
+    assert_equal event_params['location']['zip'], event.linked_contact.location.zip
+    assert_equal event_params['location']['city'], event.linked_contact.location.city
 
-    assert_equal event_params['marketentry']['web'], event.contacts.first.web
-    assert_equal event_params['marketentry']['facebook'], event.contacts.first.social_media
+    assert_equal event_params['marketentry']['web'], event.linked_contact.web
+    assert_equal event_params['marketentry']['facebook'], event.linked_contact.social_media
 
-    assert_equal event_params['marketentry']['speakerPublic'], event.contacts.first.contact_persons.first.name
-    assert_equal event_params['marketentry']['mail'], event.contacts.first.contact_persons.first.mail
-    assert_equal event_params['marketentry']['phone'], event.contacts.first.contact_persons.first.phone
+    assert_equal event_params['marketentry']['speakerPublic'], event.linked_contact.contact_persons.first.name
+    assert_equal event_params['marketentry']['mail'], event.linked_contact.contact_persons.first.mail
+    assert_equal event_params['marketentry']['phone'], event.linked_contact.contact_persons.first.phone
 
     Time.freeze do
       assert_difference -> { Event.unscoped.count } do

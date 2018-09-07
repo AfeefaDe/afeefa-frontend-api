@@ -6,7 +6,9 @@ module Entry
     belongs_to :category, optional: true
     belongs_to :sub_category, class_name: 'Category', optional: true
 
-    belongs_to :linked_contact, class_name: DataPlugins::Contact::Contact, foreign_key: :contact_id
+    belongs_to :linked_contact, class_name: DataPlugins::Contact::Contact, foreign_key: :contact_id, optional: true
+    has_many :locations, class_name: DataPlugins::Location::Location, as: :owner
+    has_many :contacts, class_name: DataPlugins::Contact::Contact, as: :owner
     has_many :translation_caches, as: :cacheable, class_name: 'TranslationCache'
 
     has_many :navigation_item_owners,
@@ -51,8 +53,8 @@ module Entry
       ]
     end
 
-    def create_via_frontend(model_atrtibtues:, contact_info_attributes: nil, location_attributes: nil)
-      model = new(model_atrtibtues)
+    def create_via_frontend(model_attributes:, contact_info_attributes: nil, location_attributes: nil)
+      model = new(model_attributes)
       model.state = :inactive
 
       unless model.valid?
@@ -78,6 +80,7 @@ module Entry
         }
 
         contact = DataPlugins::Contact::Contact.create(contact_create_params)
+        model.update(linked_contact: contact)
 
         if contact_info_attributes['contact_person'].present? ||
           contact_info_attributes['mail'].present? ||

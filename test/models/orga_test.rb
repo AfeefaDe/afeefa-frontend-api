@@ -13,7 +13,7 @@ class OrgaTest < ActiveSupport::TestCase
   test 'save entry with suffix for duplicated title' do
     assert orga = Orga.create(title: '123')
 
-    result = Orga.create_via_frontend(model_atrtibtues: { title: orga.title })
+    result = Orga.create_via_frontend(model_attributes: { title: orga.title })
     assert result[:success]
     assert new_orga = result[:model]
     assert_equal Orga.last, new_orga

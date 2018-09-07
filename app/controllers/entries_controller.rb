@@ -19,7 +19,7 @@ class EntriesController < ApplicationController
 
     result =
       entry_class.create_via_frontend(
-        model_atrtibtues: model_attributes,
+        model_attributes: model_attributes,
         contact_info_attributes: contact_info_params,
         location_attributes: location_params)
     model = result[:model]

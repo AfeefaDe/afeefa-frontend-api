@@ -4,7 +4,7 @@ FactoryGirl.define do
     title 'an event'
     date_start { Date.tomorrow }
 
-    parent_orga { build(:orga, title: "orga for #{title}", area: area) }
+    hosts { [build(:orga, title: "orga for #{title}", area: area)] }
   end
 
 end
