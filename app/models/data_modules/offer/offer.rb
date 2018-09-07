@@ -7,7 +7,6 @@ module DataModules::Offer
 
     # entry attributes that do not exist for offer but
     # are expected by included entry
-    attr_accessor :parent_orga
     attr_accessor :certified_sfr
     attr_accessor :legacy_entry_id
     attr_accessor :media_url
@@ -27,14 +26,9 @@ module DataModules::Offer
       entry.tags = ''
     end
 
+    @c = self.default_includes
     def self.default_includes
-      [
-        :category,
-        :sub_category,
-        :linked_contact,
-        :navigation_items,
-        linked_contact: [:contact_persons, :location]
-      ]
+      @c + %i(owners)
     end
 
     def as_json(*args)

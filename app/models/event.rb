@@ -2,7 +2,8 @@ class Event < ApplicationRecord
 
   include Entry
 
-  belongs_to :parent_orga, class_name: 'Orga', foreign_key: 'orga_id'
+  has_many :event_hosts, class_name: EventHost
+  has_many :hosts, through: :event_hosts, source: :actor
 
   scope :upcoming, -> {
     now = Time.now.in_time_zone(Time.zone).beginning_of_day
@@ -20,10 +21,15 @@ class Event < ApplicationRecord
     entry.entry_type = 'Event'
   end
 
+  @c = self.default_includes
+  def self.default_includes
+    @c + %i(hosts)
+  end
+
   def as_json(*args)
     json = super
 
-    json[:parentOrgaId] = Orga.is_root_orga?(self.orga_id) ? nil : self.orga_id
+    json[:parentOrgaId] = event_hosts.present? ? event_hosts.first.id : nil
 
     date_start = self.date_start.try(:in_time_zone, 'Berlin')
     date_end = self.date_end.try(:in_time_zone, 'Berlin')

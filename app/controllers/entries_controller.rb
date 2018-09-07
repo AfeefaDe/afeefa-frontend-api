@@ -163,7 +163,7 @@ class EntriesController < ApplicationController
       :title, :category, :short_description,
       :for_children, :support_wanted, :support_wanted_detail,
       :area,
-      :date_start, :date_end, #:parent_orga
+      :date_start, :date_end,
       :time_start, :time_end,
     )
   end

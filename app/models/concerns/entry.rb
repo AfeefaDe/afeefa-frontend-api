@@ -46,7 +46,6 @@ module Entry
         :category,
         :sub_category,
         :linked_contact,
-        :parent_orga,
         :navigation_items,
         linked_contact: [:contact_persons, :location]
       ]
@@ -54,7 +53,6 @@ module Entry
 
     def create_via_frontend(model_atrtibtues:, contact_info_attributes: nil, location_attributes: nil)
       model = new(model_atrtibtues)
-      model.parent_orga = Orga.root_orga
       model.state = :inactive
 
       unless model.valid?
@@ -130,7 +128,6 @@ module Entry
   def as_json(*args)
     contact = self.linked_contact
     location = contact && contact.location
-    parent_orga = self.parent_orga
 
     if location && contact
       location.openingHours = contact.opening_hours

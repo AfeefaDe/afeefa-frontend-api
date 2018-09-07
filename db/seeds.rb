@@ -9,7 +9,7 @@
 module Seeds
 
   def self.recreate_all
-    Orga.without_root.delete_all
+    Orga.delete_all
 
     AnnotationCategory.delete_all
     Annotation.delete_all
@@ -29,19 +29,6 @@ module Seeds
     OrgaType.create!(name: 'Project')
     OrgaType.create!(name: 'Location')
     OrgaType.create!(name: 'Network')
-
-    # orgas
-    if Orga.root_orga
-      orga0 = Orga.root_orga
-      orga0.orga_type_id = OrgaType.where(name: 'Root').first['id']
-      orga0.title = Orga::ROOT_ORGA_TITLE
-      orga0.description = Orga::ROOT_ORGA_DESCRIPTION
-      orga0.save!(validate: false)
-    else
-      orga0 = Orga.new(title: Orga::ROOT_ORGA_TITLE, description: Orga::ROOT_ORGA_DESCRIPTION)
-      orga0.orga_type_id = OrgaType.where(name: 'Root').first['id']
-      orga0.save!(validate: false)
-    end
 
     # annotations
     AnnotationCategory.create!(title: 'Kurzbeschreibung fehlt', generated_by_system: true)
