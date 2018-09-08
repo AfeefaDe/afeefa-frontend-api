@@ -15,7 +15,8 @@ module DataModules::Offer
     attr_accessor :support_wanted_detail
     attr_accessor :tags
 
-    scope :for_json, -> { }
+    scope :active, -> { where(active: true) }
+    scope :for_json, -> { active }
 
     after_initialize do |entry|
       entry.type = 1

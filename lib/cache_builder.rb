@@ -37,7 +37,8 @@ class CacheBuilder
       updated = true
       case type
       when 'orga', 'event', 'offer'
-        active = entry.respond_to?(:state) ? entry.state == 'active' : true
+        active = (entry.respond_to?(:state) && entry.state == 'active') ||
+          (entry.respond_to?(:active) && entry.active)
         if active
           update_entry_file(type, id, entry)
         else

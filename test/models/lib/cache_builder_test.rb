@@ -38,7 +38,7 @@ class CacheBuilderTest < ActiveSupport::TestCase
     orga = create(:orga, title: 'orga.1.title', area: 'bautzen')
     orga2 = create(:orga, title: 'orga.2.title', area: 'bautzen')
     event = create(:event, title: 'event.1.title', area: 'bautzen')
-    offer = create(:offer, title: 'offer.1.title', area: 'bautzen')
+    offer = create(:offer, title: 'offer.1.title', active: true, area: 'bautzen')
 
     cache_builder.send(:build_entries)
 
@@ -116,7 +116,7 @@ class CacheBuilderTest < ActiveSupport::TestCase
     orga = create(:orga, title: 'orga.1.title', area: 'bautzen')
     orga2 = create(:orga, title: 'orga.2.title', area: 'bautzen')
     event = create(:event, title: 'event.1.title', area: 'bautzen')
-    offer = create(:offer, title: 'offer.1.title', area: 'bautzen')
+    offer = create(:offer, title: 'offer.1.title', active: true, area: 'bautzen')
 
     cache_builder.send(:translate_all)
 
@@ -446,6 +446,7 @@ class CacheBuilderTest < ActiveSupport::TestCase
   test 'update entry with deactivated entry' do
     orga = create(:orga, title: 'orga.1.title', area: 'leipzig')
     orga2 = create(:orga, title: 'orga.2.title', area: 'leipzig')
+    offer = create(:offer, title: 'offer.1.title', area: 'leipzig', active: true)
     cache_builder.send(:build_all)
 
     locales = [Translation::DEFAULT_LOCALE] + Translation::TRANSLATABLE_LOCALES
@@ -456,10 +457,15 @@ class CacheBuilderTest < ActiveSupport::TestCase
       assert_equal 2, json['orgas'].length
       assert_equal 'orga.1.title', json['orgas'][0]['title']
       assert_equal 'orga.2.title', json['orgas'][1]['title']
+      assert_equal 1, json['offers'].length
+      assert_equal 'offer.1.title', json['offers'][0]['title']
     end
 
     orga.update(state: 'deactivated')
+    offer.update(active: false)
+
     cache_builder.update_entry('orga', orga.id)
+    cache_builder.update_entry('offer', offer.id)
 
     locales = [Translation::DEFAULT_LOCALE] + Translation::TRANSLATABLE_LOCALES
     locales.each do |locale|
@@ -468,10 +474,14 @@ class CacheBuilderTest < ActiveSupport::TestCase
       json = JSON.parse(file)
       assert_equal 1, json['orgas'].length
       assert_equal 'orga.2.title', json['orgas'][0]['title']
+      assert_equal 0, json['offers'].length
     end
 
     orga.update(state: 'active')
+    offer.update(active: true)
+
     cache_builder.update_entry('orga', orga.id)
+    cache_builder.update_entry('offer', offer.id)
 
     locales = [Translation::DEFAULT_LOCALE] + Translation::TRANSLATABLE_LOCALES
     locales.each do |locale|
@@ -481,6 +491,8 @@ class CacheBuilderTest < ActiveSupport::TestCase
       assert_equal 2, json['orgas'].length
       assert_equal 'orga.2.title', json['orgas'][0]['title']
       assert_equal 'orga.1.title', json['orgas'][1]['title']
+      assert_equal 1, json['offers'].length
+      assert_equal 'offer.1.title', json['offers'][0]['title']
     end
 
   end
