@@ -113,13 +113,13 @@ class CacheBuilder
   def get_entry_translation(entry, translation_cache)
     entry_translation = {
       id: entry.id,
-      title: translation_cache ? translation_cache.title : entry.title || ''
+      title: translation_cache && translation_cache.title || entry.title || ''
     }
     if entry.respond_to?(:short_description)
-      entry_translation['short_description'] = translation_cache ? translation_cache.short_description : entry.short_description || ''
+      entry_translation['short_description'] = translation_cache && translation_cache.short_description || entry.short_description || ''
     end
     if entry.respond_to?(:description)
-      entry_translation['description'] = translation_cache ? translation_cache.description : entry.description || ''
+      entry_translation['description'] = translation_cache && translation_cache.description || entry.description || ''
     end
     entry_translation
   end
