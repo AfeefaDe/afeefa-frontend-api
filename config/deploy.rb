@@ -1,9 +1,6 @@
 # config valid only for current version of Capistrano
 lock '3.9.1'
 
-set :rbenv_type, :user # or :system, depends on your rbenv setup
-set :rbenv_ruby, '2.4.2'
-
 # set :application, 'my_app_name'
 # set :repo_url, 'git@example.com:me/my_repo.git'
 set :application, 'afeefa-frontend-api'
@@ -14,7 +11,7 @@ set :repo_url, 'https://github.com/AfeefaDe/afeefa-frontend-api.git'
 
 # Default deploy_to directory is /var/www/my_app_name
 # set :deploy_to, '/var/www/my_app_name'
-set :deploy_to, '/home/ruby/afeefa-frontend-api'
+set :deploy_to, '/home/afeefa/rails/afeefa-frontend-api'
 
 # Default value for :scm is :git
 # set :scm, :git
