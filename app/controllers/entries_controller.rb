@@ -11,6 +11,9 @@ class EntriesController < ApplicationController
     when '2' #'event'
       entry_class = Event
       model_attributes = event_params
+    when '1' #'offer'
+      entry_class = DataModules::Offer::Offer
+      model_attributes = offer_params
     else
       render plain: 'only orgas and events are supported', status: :unprocessable_entity
       # prevent double rendering
@@ -123,10 +126,15 @@ class EntriesController < ApplicationController
     map_marketentry_params(params.fetch(:marketentry, {}).permit!)
   end
 
+  def offer_params
+    map_marketentry_params(params.fetch(:marketentry, {}).permit!).
+      except(:date_start, :date_end, :for_children, :support_wanted)
+  end
+
   def map_marketentry_params(params)
     params.merge!(
       title: params.delete(:name),
-      category: Category.where(parent_id: nil).where(title: params.delete(:category)).first,
+      category: DataModules::FeNavigation::FeNavigationItem.find(params.delete(:category)),
       short_description: params.delete(:descriptionShort),
       for_children: params.delete(:forChildren),
       support_wanted: params.delete(:supportWanted),

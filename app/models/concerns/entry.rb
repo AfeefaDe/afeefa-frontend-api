@@ -54,8 +54,12 @@ module Entry
     end
 
     def create_via_frontend(model_attributes:, contact_info_attributes: nil, location_attributes: nil)
+      category = model_attributes.delete(:category)
       model = new(model_attributes)
-      model.state = :inactive
+
+      if model.respond_to?(:state)
+        model.state = :inactive
+      end
 
       unless model.valid?
         tries = 1
@@ -68,55 +72,62 @@ module Entry
 
       model_save_success = model.save
 
-      contact = nil
+      if model_save_success
+        contact = nil
 
-      if contact_info_attributes.present?
-        contact_create_params = {
-          web: contact_info_attributes['web'],
-          social_media: contact_info_attributes['social_media'],
-          spoken_languages: contact_info_attributes['spoken_languages'],
-          owner_id: model.id,
-          owner_type: model.class.name
-        }
+        if contact_info_attributes.present?
+          contact_create_params = {
+            web: contact_info_attributes['web'],
+            social_media: contact_info_attributes['social_media'],
+            spoken_languages: contact_info_attributes['spoken_languages'],
+            owner_id: model.id,
+            owner_type: model.class.name
+          }
 
-        contact = DataPlugins::Contact::Contact.create(contact_create_params)
-        model.update(linked_contact: contact)
+          contact = DataPlugins::Contact::Contact.create(contact_create_params)
+          model.update(linked_contact: contact)
 
-        if contact_info_attributes['contact_person'].present? ||
-          contact_info_attributes['mail'].present? ||
-          contact_info_attributes['phone'].present?
+          if contact_info_attributes['contact_person'].present? ||
+            contact_info_attributes['mail'].present? ||
+            contact_info_attributes['phone'].present?
 
-          contact_person = DataPlugins::Contact::ContactPerson.create({
-            name: contact_info_attributes['contact_person'],
-            mail: contact_info_attributes['mail'],
-            phone: contact_info_attributes['phone'],
-            contact_id: contact.id
-          })
+            contact_person = DataPlugins::Contact::ContactPerson.create({
+              name: contact_info_attributes['contact_person'],
+              mail: contact_info_attributes['mail'],
+              phone: contact_info_attributes['phone'],
+              contact_id: contact.id
+            })
+          end
         end
-      end
 
-      if location_attributes.present?
-        unless contact
-          contact = DataPlugins::Contact::Contact.new(
+        if location_attributes.present?
+          unless contact
+            contact = DataPlugins::Contact::Contact.new(
+              owner_id: model.id,
+              owner_type: model.class.name
+            )
+          end
+
+          location_create_params = location_attributes.merge(
+            title: location_attributes.delete(:placename),
+            contact_id: contact.id,
             owner_id: model.id,
             owner_type: model.class.name
           )
+
+          location = DataPlugins::Location::Location.create!(location_create_params)
+          contact.location = location
+          contact.save
         end
 
-        location_create_params = location_attributes.merge(
-          title: location_attributes.delete(:placename),
-          contact_id: contact.id,
-          owner_id: model.id,
-          owner_type: model.class.name
+        DataModules::FeNavigation::FeNavigationItemOwner.create(
+          navigation_item: DataModules::FeNavigation::FeNavigationItem.find(category),
+          owner: model
         )
 
-        location = DataPlugins::Location::Location.create!(location_create_params)
-        contact.location = location
-        contact.save
+        annotation_category = AnnotationCategory.external_entry
+        Annotation.create(entry: model, annotation_category: annotation_category)
       end
-
-      annotation_category = AnnotationCategory.external_entry
-      Annotation.create(entry: model, annotation_category: annotation_category)
 
       {
         model: model,
