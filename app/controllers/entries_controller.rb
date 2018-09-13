@@ -134,7 +134,7 @@ class EntriesController < ApplicationController
   def map_marketentry_params(params)
     params.merge!(
       title: params.delete(:name),
-      category: DataModules::FeNavigation::FeNavigationItem.find(params.delete(:category)),
+      category: params.delete(:category),
       short_description: params.delete(:descriptionShort),
       for_children: params.delete(:forChildren),
       support_wanted: params.delete(:supportWanted),
