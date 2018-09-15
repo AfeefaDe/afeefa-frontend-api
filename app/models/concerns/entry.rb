@@ -47,8 +47,7 @@ module Entry
       [
         :category,
         :sub_category,
-        :linked_contact,
-        :navigation_items,
+        navigation_items: [:sub_items, :parent],
         linked_contact: [:contact_persons, :location]
       ]
     end
@@ -164,7 +163,7 @@ module Entry
       end
     end
 
-    sub_navigation_item = navigation_items.where.not(parent_id: nil).first
+    sub_navigation_item = navigation_items.find { |ni| ni.parent_id.present? }
     if sub_navigation_item
       navigation_item = sub_navigation_item.parent
     else

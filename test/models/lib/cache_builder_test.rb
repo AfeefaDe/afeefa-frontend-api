@@ -56,8 +56,8 @@ class CacheBuilderTest < ActiveSupport::TestCase
     assert_equal offer.id, json['offers'][0]['id']
   end
 
-  test 'translate_all creates empty entries files if no entry exists' do
-    cache_builder.send(:translate_all)
+  test 'translate_all_areas creates empty entries files if no entry exists' do
+    cache_builder.send(:translate_all_areas)
 
     locales = [Translation::DEFAULT_LOCALE] + Translation::TRANSLATABLE_LOCALES
     locales.each do |locale|
@@ -118,7 +118,7 @@ class CacheBuilderTest < ActiveSupport::TestCase
     event = create(:event, title: 'event.1.title', area: 'bautzen')
     offer = create(:offer, title: 'offer.1.title', active: true, area: 'bautzen')
 
-    cache_builder.send(:translate_all)
+    cache_builder.send(:translate_all_areas)
 
     locales = [Translation::DEFAULT_LOCALE] + Translation::TRANSLATABLE_LOCALES
     locales.each do |locale|
@@ -152,7 +152,7 @@ class CacheBuilderTest < ActiveSupport::TestCase
     navigation_item.update(title: 'navigation_item.4.title')
     navigation_item.translation_caches << build(:translation, cacheable: navigation_item, language: 'en', title: navigation_item.title + '_en')
 
-    cache_builder.send(:translate_all)
+    cache_builder.send(:translate_all_areas)
 
     locales = [Translation::DEFAULT_LOCALE] + Translation::TRANSLATABLE_LOCALES
     locales.each do |locale|
@@ -205,7 +205,7 @@ class CacheBuilderTest < ActiveSupport::TestCase
     navigation = create(:fe_navigation_with_items_and_sub_items, area: 'bautzen')
     navigation2 = create(:fe_navigation_with_items, area: 'leipzig')
 
-    cache_builder.send(:translate_all)
+    cache_builder.send(:translate_all_areas)
 
     locales = [Translation::DEFAULT_LOCALE] + Translation::TRANSLATABLE_LOCALES
     locales.each do |locale|
@@ -242,7 +242,7 @@ class CacheBuilderTest < ActiveSupport::TestCase
     cache_builder.expects(:build_facets)
     cache_builder.expects(:build_navigations)
     cache_builder.expects(:build_entries)
-    cache_builder.expects(:translate_all)
+    cache_builder.expects(:translate_all_areas)
 
     cache_builder.build_all
   end

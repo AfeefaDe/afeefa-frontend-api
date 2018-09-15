@@ -3,7 +3,7 @@ class ChangeController < ApplicationController
   before_action :ensure_token
 
   def update
-    permitted_params = params.permit(:type, :id, :locale, :deleted, :area)
+    permitted_params = params.permit(:job_created)
     FrontendCacheRebuildJob.perform_later(permitted_params.to_h)
     render json: { status: 'ok' }, status: :ok
   end
