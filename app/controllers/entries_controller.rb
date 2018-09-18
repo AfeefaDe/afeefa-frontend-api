@@ -94,6 +94,8 @@ class EntriesController < ApplicationController
       Orga.find(id)
     when 'events'
       Event.find(id)
+    when 'offers'
+      DataModules::Offer::Offer.find(id)
     else
       nil
     end
