@@ -3,6 +3,7 @@ module DataPlugins::Contact
     # disable rails single table inheritance
     self.inheritance_column = :_type_disabled
 
+    belongs_to :owner, polymorphic: true, optional: true
     has_many :contact_persons, class_name: DataPlugins::Contact::ContactPerson
     belongs_to :location, class_name: DataPlugins::Location::Location, optional: true
 
