@@ -150,6 +150,24 @@ class FrontendCacheRebuildJobTest < ActionController::TestCase
     end
   end
 
+  it 'should not run multipe times if multipe times notified' do
+    FapiCacheJob.create!(
+      translated: true,
+      updated: true
+    )
+
+    CacheBuilder.any_instance.expects(:build_all).once
+
+    perform_enqueued_jobs do
+      FrontendCacheRebuildJob.perform_later(job_created: true)
+      FrontendCacheRebuildJob.perform_later(job_created: true)
+      FrontendCacheRebuildJob.perform_later(job_created: true)
+      FrontendCacheRebuildJob.perform_now(job_created: true)
+      FrontendCacheRebuildJob.perform_now(job_created: true)
+      FrontendCacheRebuildJob.perform_now(job_created: true)
+    end
+  end
+
   it 'should process update_entry job' do
     orga = create(:orga)
 
