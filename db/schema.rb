@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20180903213332) do
+ActiveRecord::Schema.define(version: 20180914064457) do
 
   create_table "actor_relations", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
     t.integer  "associating_actor_id"
@@ -142,15 +142,16 @@ ActiveRecord::Schema.define(version: 20180903213332) do
   end
 
   create_table "contacts", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
-    t.string   "owner_type"
-    t.integer  "owner_id"
-    t.integer  "location_id"
     t.string   "title"
     t.string   "web",              limit: 1000
     t.string   "social_media",     limit: 1000
     t.string   "spoken_languages"
     t.string   "fax"
     t.text     "opening_hours",    limit: 65535
+    t.string   "owner_type"
+    t.integer  "owner_id"
+    t.integer  "location_id"
+    t.string   "location_spec"
     t.datetime "created_at",                     null: false
     t.datetime "updated_at",                     null: false
     t.index ["location_id"], name: "index_contacts_on_location_id", using: :btree
@@ -173,7 +174,6 @@ ActiveRecord::Schema.define(version: 20180903213332) do
   end
 
   create_table "events", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
-    t.integer  "contact_id"
     t.string   "title"
     t.text     "description",           limit: 65535
     t.text     "short_description",     limit: 65535
@@ -203,6 +203,8 @@ ActiveRecord::Schema.define(version: 20180903213332) do
     t.string   "tags"
     t.string   "inheritance"
     t.string   "area"
+    t.integer  "contact_id"
+    t.string   "contact_spec"
     t.integer  "last_editor_id"
     t.string   "facebook_id"
     t.index ["area"], name: "index_events_on_area", using: :btree
@@ -251,6 +253,21 @@ ActiveRecord::Schema.define(version: 20180903213332) do
     t.datetime "updated_at",                     null: false
   end
 
+  create_table "fapi_cache_jobs", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
+    t.string   "entry_type"
+    t.integer  "entry_id"
+    t.integer  "area_id"
+    t.boolean  "updated"
+    t.boolean  "deleted"
+    t.boolean  "translated"
+    t.string   "language"
+    t.datetime "created_at"
+    t.datetime "started_at"
+    t.datetime "finished_at"
+    t.index ["area_id"], name: "index_fapi_cache_jobs_on_area_id", using: :btree
+    t.index ["entry_type", "entry_id"], name: "index_fapi_cache_jobs_on_entry_type_and_entry_id", using: :btree
+  end
+
   create_table "fe_navigation_item_facet_items", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
     t.integer  "facet_item_id"
     t.integer  "navigation_item_id"
@@ -274,10 +291,12 @@ ActiveRecord::Schema.define(version: 20180903213332) do
     t.string   "title"
     t.string   "color"
     t.string   "icon"
+    t.string   "legacy_title"
     t.integer  "navigation_id"
     t.integer  "parent_id"
-    t.datetime "created_at",    null: false
-    t.datetime "updated_at",    null: false
+    t.integer  "order",         default: 0, null: false
+    t.datetime "created_at",                null: false
+    t.datetime "updated_at",                null: false
     t.index ["navigation_id"], name: "index_fe_navigation_items_on_navigation_id", using: :btree
     t.index ["parent_id"], name: "index_fe_navigation_items_on_parent_id", using: :btree
   end
@@ -319,16 +338,18 @@ ActiveRecord::Schema.define(version: 20180903213332) do
   end
 
   create_table "offers", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
-    t.integer  "contact_id"
     t.string   "title"
-    t.text     "description",    limit: 65535
+    t.text     "short_description", limit: 65535
+    t.text     "description",       limit: 65535
     t.string   "area"
-    t.boolean  "active",                       default: false, null: false
+    t.boolean  "active",                          default: false, null: false
     t.string   "image_url"
+    t.integer  "contact_id"
+    t.string   "contact_spec"
     t.integer  "last_editor_id"
     t.integer  "creator_id"
-    t.datetime "created_at",                                   null: false
-    t.datetime "updated_at",                                   null: false
+    t.datetime "created_at",                                      null: false
+    t.datetime "updated_at",                                      null: false
     t.index ["contact_id"], name: "index_offers_on_contact_id", using: :btree
     t.index ["creator_id"], name: "index_offers_on_creator_id", using: :btree
     t.index ["last_editor_id"], name: "index_offers_on_last_editor_id", using: :btree
@@ -351,7 +372,6 @@ ActiveRecord::Schema.define(version: 20180903213332) do
   end
 
   create_table "orgas", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
-    t.integer  "contact_id"
     t.integer  "orga_type_id"
     t.datetime "created_at",                                          null: false
     t.datetime "updated_at",                                          null: false
@@ -374,6 +394,8 @@ ActiveRecord::Schema.define(version: 20180903213332) do
     t.string   "tags"
     t.string   "inheritance"
     t.string   "area"
+    t.integer  "contact_id"
+    t.string   "contact_spec"
     t.integer  "last_editor_id"
     t.integer  "creator_id"
     t.string   "facebook_id"

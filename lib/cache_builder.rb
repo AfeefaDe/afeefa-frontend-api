@@ -10,7 +10,7 @@ class CacheBuilder
     # build entries
     build_entries
     # build translations
-    translate_all
+    translate_all_areas
   end
 
   def translate_entry(type, id, locale)
@@ -20,9 +20,9 @@ class CacheBuilder
       translation_cache = entry.translation_caches.find_by(language: locale)
       entry_translation = get_entry_translation(entry, translation_cache)
 
-      if entry.respond_to?(:area)
+      if entry.respond_to?(:area) # orga, offer, event, navigation_item
         update_entry_translation_file(entry.area, locale, type, id, entry_translation)
-      else
+      else # facet_item is valid for all areas
         Translation::AREAS.each do |area|
           update_entry_translation_file(area, locale, type, id, entry_translation)
         end
@@ -78,26 +78,44 @@ class CacheBuilder
     FileUtils.rm_rf(Dir.glob("#{CACHE_PATH}/*"))
   end
 
-  private
-
-  def translate_all
+  def translate_all_areas
     Translation::AREAS.each do |area|
-      locales = [Translation::DEFAULT_LOCALE] + Translation::TRANSLATABLE_LOCALES
-      locales.each do |locale|
-        translations = {}
-
-        translations['orgas'] = get_entry_translations(Orga, area, locale)
-        translations['offers'] = get_entry_translations(DataModules::Offer::Offer, area, locale)
-        translations['events'] = get_entry_translations(Event, area, locale)
-        translations['facet_items'] = get_facet_item_translations(locale)
-        translations['navigation_items'] = get_navigation_item_translations(area, locale)
-
-        content = translations.to_json
-        cache_file_path = File.join(CACHE_PATH, "lang-#{locale}-#{area}.json").to_s
-        write_cache_file(cache_file_path, content)
-      end
+      translate_area(area)
     end
   end
+
+  def translate_area(area)
+    locales = [Translation::DEFAULT_LOCALE] + Translation::TRANSLATABLE_LOCALES
+    locales.each do |locale|
+      translate_language_for_area(area, locale)
+    end
+  end
+
+  def translate_language_for_area(area, locale)
+    translations = {}
+
+    translations['orgas'] = get_entry_translations(Orga, area, locale)
+    translations['offers'] = get_entry_translations(DataModules::Offer::Offer, area, locale)
+    translations['events'] = get_entry_translations(Event, area, locale)
+    translations['facet_items'] = get_facet_item_translations(locale)
+    translations['navigation_items'] = get_navigation_item_translations(area, locale)
+
+    content = translations.to_json
+    cache_file_path = File.join(CACHE_PATH, "lang-#{locale}-#{area}.json").to_s
+    write_cache_file(cache_file_path, content)
+  end
+
+  def build_entries_for_area(area)
+    content = {
+      orgas: get_entries(Orga, area),
+      offers: get_entries(DataModules::Offer::Offer, area),
+      events: get_entries(Event, area)
+    }.to_json
+    cache_file_path = File.join(CACHE_PATH, "entries-#{area}.json").to_s
+    write_cache_file(cache_file_path, content)
+  end
+
+  private
 
   def get_entry_translations(model_class, area, locale)
     translations = []
@@ -174,13 +192,7 @@ class CacheBuilder
 
   def build_entries
     Translation::AREAS.each do |area|
-      content = {
-        orgas: get_entries(Orga, area),
-        offers: get_entries(DataModules::Offer::Offer, area),
-        events: get_entries(Event, area)
-      }.to_json
-      cache_file_path = File.join(CACHE_PATH, "entries-#{area}.json").to_s
-      write_cache_file(cache_file_path, content)
+      build_entries_for_area(area)
     end
   end
 

@@ -53,11 +53,14 @@ namespace :cache do
     on roles(:web), in: :groups, limit: 3, wait: 10 do
       # Here we can do anything such as:
       within release_path do
-        execute "cd #{release_path} && bundle exec rails runner -e production 'CacheBuilder.new.build_all'"
+        if fetch(:stage).to_s == 'production'
+          execute "cd #{release_path} && bundle exec rails runner -e production 'CacheBuilder.new.build_all'"
+        else
+          execute "cd #{release_path} && ~/.rbenv/bin/rbenv exec bundle exec rails runner -e production 'CacheBuilder.new.build_all'"
+        end
       end
     end
   end
-
 end
 
 namespace :deploy do
@@ -66,13 +69,11 @@ namespace :deploy do
     on roles(:web), in: :groups, limit: 3, wait: 10 do
       # Here we can do anything such as:
       within release_path do
-        api =
-          if fetch(:stage).to_s == 'production'
-            'frontend-api'
-          else
-            'frontend-dev-api'
-          end
-        execute "svc -du ~/service/#{api}" # maybe we can use -h instead of -du
+        if fetch(:stage).to_s == 'production'
+          execute "svc -du ~/service/frontend-api" # maybe we can use -h instead of -du
+        else
+          execute "sudo /bin/systemctl restart frontend-api-dev.service"
+        end
       end
     end
   end
@@ -81,13 +82,11 @@ namespace :deploy do
     on roles(:web), in: :groups, limit: 3, wait: 10 do
       # Here we can do anything such as:
       within release_path do
-        api =
-          if fetch(:stage).to_s == 'production'
-            'frontend-api'
-          else
-            'frontend-dev-api'
-          end
-        execute "svc -d ~/service/#{api}" # maybe we can use -h instead of -du
+        if fetch(:stage).to_s == 'production'
+          execute "svc -d ~/service/frontend-api" # maybe we can use -h instead of -du
+        else
+          execute "sudo /bin/systemctl stop frontend-api-dev.service"
+        end
       end
     end
   end
@@ -96,13 +95,11 @@ namespace :deploy do
     on roles(:web), in: :groups, limit: 3, wait: 10 do
       # Here we can do anything such as:
       within release_path do
-        api =
-          if fetch(:stage).to_s == 'production'
-            'frontend-api'
-          else
-            'frontend-dev-api'
-          end
-        execute "svc -u ~/service/#{api}" # maybe we can use -h instead of -du
+        if fetch(:stage).to_s == 'production'
+          execute "svc -u ~/service/frontend-dev" # maybe we can use -h instead of -du
+        else
+          execute "sudo /bin/systemctl start frontend-api-dev.service"
+        end
       end
     end
   end

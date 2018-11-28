@@ -47,8 +47,7 @@ module Entry
       [
         :category,
         :sub_category,
-        :linked_contact,
-        :navigation_items,
+        navigation_items: [:sub_items, :parent],
         linked_contact: [:contact_persons, :location]
       ]
     end
@@ -120,10 +119,12 @@ module Entry
           contact.save
         end
 
-        DataModules::FeNavigation::FeNavigationItemOwner.create(
-          navigation_item: DataModules::FeNavigation::FeNavigationItem.find(category),
-          owner: model
-        )
+        if category.present?
+          DataModules::FeNavigation::FeNavigationItemOwner.create(
+            navigation_item: DataModules::FeNavigation::FeNavigationItem.find(category),
+            owner: model
+          )
+        end
 
         annotation_category = AnnotationCategory.external_entry
         Annotation.create(entry: model, annotation_category: annotation_category)
@@ -147,20 +148,22 @@ module Entry
       location.openingHours = contact.opening_hours
     end
 
-    if contact && contact.contact_persons.first
+    if contact
       self.social_media = contact.social_media
       self.web = contact.web
       self.spoken_languages = contact.spoken_languages
 
-      contact_person = contact.contact_persons.first
-      if contact_person
-        self.phone = contact_person.phone
-        self.mail = contact_person.mail
-        self.contact_person = contact_person.name
+      if contact.contact_persons.present?
+        contact_person = contact.contact_persons.first
+        if contact_person
+          self.phone = contact_person.phone
+          self.mail = contact_person.mail
+          self.contact_person = contact_person.name
+        end
       end
     end
 
-    sub_navigation_item = navigation_items.where.not(parent_id: nil).first
+    sub_navigation_item = navigation_items.find { |ni| ni.parent_id.present? }
     if sub_navigation_item
       navigation_item = sub_navigation_item.parent
     else

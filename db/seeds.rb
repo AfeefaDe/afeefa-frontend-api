@@ -9,6 +9,11 @@
 module Seeds
 
   def self.recreate_all
+    DataModules::FeNavigation::FeNavigation.delete_all
+    DataModules::FeNavigation::FeNavigation.create(id: 1)
+    DataModules::FeNavigation::FeNavigationItem.delete_all
+    DataModules::FeNavigation::FeNavigationItem.create(id: 1, navigation: DataModules::FeNavigation::FeNavigation.first)
+
     Orga.delete_all
 
     AnnotationCategory.delete_all
