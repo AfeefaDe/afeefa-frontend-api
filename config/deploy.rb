@@ -1,6 +1,9 @@
 # config valid only for current version of Capistrano
 lock '3.9.1'
 
+set :rbenv_type, :user # or :system, depends on your rbenv setup
+set :rbenv_ruby, '2.4.2'
+
 # set :application, 'my_app_name'
 # set :repo_url, 'git@example.com:me/my_repo.git'
 set :application, 'afeefa-frontend-api'
@@ -11,7 +14,7 @@ set :repo_url, 'https://github.com/AfeefaDe/afeefa-frontend-api.git'
 
 # Default deploy_to directory is /var/www/my_app_name
 # set :deploy_to, '/var/www/my_app_name'
-set :deploy_to, '/home/afeefa/rails/afeefa-frontend-api'
+set :deploy_to, '/home/ruby/afeefa-frontend-api'
 
 # Default value for :scm is :git
 # set :scm, :git
@@ -54,7 +57,7 @@ namespace :cache do
       # Here we can do anything such as:
       within release_path do
         if fetch(:stage).to_s == 'production'
-          execute "cd #{release_path} && bundle exec rails runner -e production 'CacheBuilder.new.build_all'"
+          execute "cd #{release_path} && ~/.rbenv/bin/rbenv exec bundle exec rails runner -e production 'CacheBuilder.new.build_all'"
         else
           execute "cd #{release_path} && ~/.rbenv/bin/rbenv exec bundle exec rails runner -e production 'CacheBuilder.new.build_all'"
         end
@@ -70,7 +73,7 @@ namespace :deploy do
       # Here we can do anything such as:
       within release_path do
         if fetch(:stage).to_s == 'production'
-          execute "svc -du ~/service/frontend-api" # maybe we can use -h instead of -du
+          execute "sudo /bin/systemctl restart frontend-api.service"
         else
           execute "sudo /bin/systemctl restart frontend-api-dev.service"
         end
@@ -83,7 +86,7 @@ namespace :deploy do
       # Here we can do anything such as:
       within release_path do
         if fetch(:stage).to_s == 'production'
-          execute "svc -d ~/service/frontend-api" # maybe we can use -h instead of -du
+          execute "sudo /bin/systemctl stop frontend-api.service"
         else
           execute "sudo /bin/systemctl stop frontend-api-dev.service"
         end
@@ -96,7 +99,7 @@ namespace :deploy do
       # Here we can do anything such as:
       within release_path do
         if fetch(:stage).to_s == 'production'
-          execute "svc -u ~/service/frontend-dev" # maybe we can use -h instead of -du
+          execute "sudo /bin/systemctl start frontend-api.service"
         else
           execute "sudo /bin/systemctl start frontend-api-dev.service"
         end
