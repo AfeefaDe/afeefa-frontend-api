@@ -1,9 +1,8 @@
-FactoryGirl.define do
-
+FactoryBot.define do
   factory :entry do
-    short_description 'this is the short description'
-    area 'dresden'
-    state 'active'
+    short_description { 'this is the short description' }
+    area { 'dresden' }
+    state { 'active' }
 
     association :category, factory: :category
 
@@ -16,10 +15,7 @@ FactoryGirl.define do
     end
 
     transient do
-      translated_locales []
+      translated_locales { [] }
     end
-
   end
-
-
 end

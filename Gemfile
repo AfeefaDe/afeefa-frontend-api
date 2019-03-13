@@ -10,8 +10,6 @@ end
 gem 'mysql2'
 # Bundle edge Rails instead: gem 'rails', github: 'rails/rails'
 gem 'rails', '~> 5.0.2'
-# Use sqlite3 as the database for Active Record
-gem 'sqlite3'
 # Use Unicorn (not puma) as the app server
 platforms :ruby do
   gem 'unicorn'
@@ -36,39 +34,52 @@ gem 'config'
 # http requests
 gem 'http'
 
-group :development, :test do
-  # Call 'byebug' anywhere in the code to stop execution and get a debugger console
-  gem 'byebug', platform: :mri
-  gem 'ruby-debug-ide'
-  gem 'debase'
-
+group :test do
   # test framework
   gem 'minitest-rails'
-  gem 'minitest-reporters'
 
   # for tests
-  gem 'mocha'
+  gem 'factory_bot_rails'
   gem 'timecop'
-
-  gem 'rails_best_practices'
-  gem 'bullet'
-  gem 'factory_girl_rails'
+  gem 'minitest-rails-capybara'
+  gem 'minitest', '5.10.2'
+  gem 'mocha'
+  gem 'shoulda-context'
 
   # code coverage
+  gem 'ruby-prof'
   gem 'simplecov', require: false
+
+  # We do not longer use sqlite3:
+  # gem 'sqlite3'
+end
+
+group :test, :development do
+  gem 'rails_best_practices'
+  gem 'bullet'
+
+  # Call 'byebug' anywhere in the code to stop execution and get a debugger console
+  # gem 'byebug', platform: :mri
+  # comfortable rails console and debugger, also useful in production:
+  gem 'pry'
+  gem 'pry-rails'
+  gem 'pry-byebug'
 end
 
 group :development do
-  gem 'listen', '~> 3.0.5'
+  # documentation
+  gem 'railroady'
+  gem 'rails-erd'
+
+  gem 'listen'
   # Spring speeds up development by keeping your application running in the background. Read more: https://github.com/rails/spring
   gem 'spring'
-  gem 'spring-watcher-listen', '~> 2.0.0'
+  gem 'spring-watcher-listen'
+
   # Use Capistrano for deployment
   gem 'capistrano-rails'
-  gem 'capistrano', '~> 3.9.1'
-  gem 'capistrano-rbenv', '~> 2.1'
+  gem 'capistrano-rbenv'
 end
-
 
 # Windows does not include zoneinfo files, so bundle the tzinfo-data gem
 gem 'tzinfo-data', platforms: [:mingw, :mswin, :x64_mingw, :jruby]

@@ -1,7 +1,5 @@
-FactoryGirl.define do
-
+FactoryBot.define do
   factory :offer, class: DataModules::Offer::Offer do
-    title 'an offer'
+    title { 'an offer' }
   end
-
 end

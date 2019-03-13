@@ -1,13 +1,13 @@
-FactoryGirl.define do
+FactoryBot.define do
   factory :user do
-    email {"foo#{rand(0..1000)}@afeefa.de"}
-    forename 'Max'
-    surname 'Mustermann'
+    email { "foo#{rand(0..1000)}@afeefa.de" }
+    forename { 'Max' }
+    surname { 'Mustermann' }
     # TODO: remove required password from device
-    password 'abc12346'
+    password { 'abc12346' }
 
     factory :another_user do
-      email 'bar@afeefa.de'
+      email { 'bar@afeefa.de' }
     end
 
     # factory :admin do
@@ -36,6 +36,5 @@ FactoryGirl.define do
     # after(:create) do |user|
     #   user.orgas.map(&:save!)
     # end
-
   end
 end

@@ -3,15 +3,13 @@ SimpleCov.start 'rails' do
   add_group 'Decorators', 'app/decorators'
 end
 
-ENV['RAILS_ENV'] = 'test'
+ENV['RAILS_ENV'] ||= 'test'
 require File.expand_path('../../config/environment', __FILE__)
 require 'rails/test_help'
 require 'minitest/rails'
-require 'mocha/mini_test'
-require 'minitest/reporters'
-Minitest::Reporters.use!
+require 'mocha/minitest'
 
-# TODO: Handle this fuckup! We do not want do run seeds anytime we load this helper...
+# TODO: This is needed because of the strange issues in frontend api... DAMN!
 require File.expand_path('../../db/seeds', __FILE__)
 ::Seeds.recreate_all
 
@@ -22,6 +20,5 @@ class ActiveSupport::TestCase
 
   # Add more helper methods to be used by all tests here...
 
-  include FactoryGirl::Syntax::Methods
-
+  include FactoryBot::Syntax::Methods
 end

@@ -1,8 +1,5 @@
-FactoryGirl.define do
-
+FactoryBot.define do
   factory :orga, parent: :entry, class: Orga do
-    title 'an orga'
+    title { 'an orga' }
   end
-
-
 end
