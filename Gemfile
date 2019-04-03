@@ -12,7 +12,8 @@ gem 'mysql2'
 gem 'rails', '~> 5.0.2'
 # Use Unicorn (not puma) as the app server
 platforms :ruby do
-  gem 'unicorn'
+  # keep this version of unicorn, because 5.5.0 seems not to be stable, update later
+  gem 'unicorn', '~> 5.4.1'
 end
 # Use Puma as the app server
 # gem 'puma', '~> 3.0'
