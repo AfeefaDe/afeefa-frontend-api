@@ -71,9 +71,6 @@ GEM
       deep_merge (~> 1.1.1)
       dry-validation (~> 0.10.4)
     crass (1.0.2)
-    debase (0.2.2)
-      debase-ruby_core_source (>= 0.10.2)
-    debase-ruby_core_source (0.10.3)
     deep_merge (1.1.1)
     docile (1.1.5)
     domain_name (0.5.20170404)
@@ -252,7 +249,6 @@ DEPENDENCIES
   capistrano-rails
   capistrano-rbenv (~> 2.1)
   config
-  debase
   factory_girl_rails
   http
   listen (~> 3.0.5)
