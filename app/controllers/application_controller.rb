@@ -2,7 +2,7 @@ class ApplicationController < ActionController::API
 
   def index
     area =
-      if params['area'].present? && ['leipzig', 'bautzen', 'leipzig-landkreis'].include?(params['area'])
+      if params['area'].present? && ['leipzig', 'bautzen', 'lkleipzig'].include?(params['area'])
         params['area']
       else
         'dresden'
