@@ -179,7 +179,8 @@ GEM
       pry (>= 0.10.4)
     public_suffix (3.0.3)
     rack (2.0.6)
-    rack-cors (1.0.2)
+    rack-cors (1.0.5)
+      rack (>= 1.6.0)
     rack-test (0.6.3)
       rack (>= 1.0)
     railroady (1.5.3)
@@ -225,6 +226,8 @@ GEM
     rb-inotify (0.10.0)
       ffi (~> 1.0)
     require_all (2.0.0)
+    ruby-debug-ide (0.7.2)
+      rake (>= 0.8.1)
     ruby-graphviz (1.2.4)
     ruby-prof (0.17.0)
     ruby-progressbar (1.10.0)
@@ -274,6 +277,7 @@ PLATFORMS
 
 DEPENDENCIES
   bullet
+  byebug
   capistrano-rails
   capistrano-rbenv
   config
@@ -293,6 +297,7 @@ DEPENDENCIES
   rails (~> 5.0.2)
   rails-erd
   rails_best_practices
+  ruby-debug-ide
   ruby-prof
   shoulda-context
   simplecov
