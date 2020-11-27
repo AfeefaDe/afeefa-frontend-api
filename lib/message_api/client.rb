@@ -69,6 +69,8 @@ module MessageApi
             'orgas'
           when 'Event'
             'events'
+          when 'DataModules::Offer::Offer'
+            'offers'
           end
         path = Settings.backend_ui.path || 'https://backend.afeefa.de'
         "#{path}/#{type}/#{model.id}"
@@ -81,18 +83,19 @@ module MessageApi
             'project'
           when 'Event'
             'event'
+          when 'DataModules::Offer::Offer'
+            'offer'
           end
         path = Settings.frontend_ui.path || 'https://afeefa.de'
         "#{path}/#{type}/#{model.id}"
       end
 
       def get_contact_data(model)
-        # TODO: This needs to be migrated for new data structure and plugin structure
-        contact_info = ContactInfo.where(contactable: model).first
-        if contact_info
+        contact = DataPlugins::Contact::Contact.where(owner: model).first
+        if contact
           {
-            name: contact_info.contact_person,
-            email: contact_info.mail
+            name: contact.contact_persons.first.try(:name) || '',
+            email: contact.contact_persons.first.try(:mail) || '',
           }
         end
       rescue => exc

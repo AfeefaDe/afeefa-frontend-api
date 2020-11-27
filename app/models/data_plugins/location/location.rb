@@ -13,6 +13,7 @@ module DataPlugins::Location
         city: self.city || '',
         lat: self.lat || '',
         lon: self.lon || '',
+        openingHours: self.openingHours || '',
         arrival: self.directions || ''
       }
     end

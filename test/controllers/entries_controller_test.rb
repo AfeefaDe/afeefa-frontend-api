@@ -424,8 +424,10 @@ class EntriesControllerTest < ActionController::TestCase
     assert_contact_entry_mail_success
 
     orga = Orga.last
-    ContactInfo.create!(contactable: orga, contact_person: 'Max Mustermann', mail: 'max@mustermann.foo')
-    assert ContactInfo.where(contactable: orga).any?
+    contact = DataPlugins::Contact::Contact.create!(owner: orga)
+    contact_person = DataPlugins::Contact::ContactPerson.create(name: 'Max Mustermann', mail: 'max@mustermann.foo')
+    contact.contact_persons << contact_person
+    assert DataPlugins::Contact::Contact.where(owner: orga).any?
 
     post :contact_entry, params: {
       type: 'orgas',
@@ -442,8 +444,10 @@ class EntriesControllerTest < ActionController::TestCase
     assert_contact_entry_mail_error
 
     orga = Orga.last
-    ContactInfo.create!(contactable: orga, contact_person: 'Max Mustermann', mail: 'max@mustermann.foo')
-    assert ContactInfo.where(contactable: orga).any?
+    contact = DataPlugins::Contact::Contact.create!(owner: orga)
+    contact_person = DataPlugins::Contact::ContactPerson.create(name: 'Max Mustermann', mail: 'max@mustermann.foo')
+    contact.contact_persons << contact_person
+    assert DataPlugins::Contact::Contact.where(owner: orga).any?
 
     post :contact_entry, params: {
       type: 'orgas',

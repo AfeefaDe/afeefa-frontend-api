@@ -35,7 +35,13 @@ gem 'config'
 # http requests
 gem 'http'
 
-group :test do
+group :development, :test do
+  # Call 'byebug' anywhere in the code to stop execution and get a debugger console
+  gem 'byebug', platform: :mri
+  gem 'ruby-debug-ide'
+  # TODO: Do we need this anymore?
+  # gem 'debase'
+
   # test framework
   gem 'minitest-rails'
 
