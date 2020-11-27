@@ -7,7 +7,7 @@ server 'schedar.uberspace.de', user: 'afeefa', roles: %w{app db web}#, my_proper
 # server 'example.com', user: 'deploy', roles: %w{app web}, other_property: :other_value
 # server 'db.example.com', user: 'deploy', roles: %w{db}
 
-set :deploy_to, '/home/ruby/rails/afeefa-frontend-api'
+set :deploy_to, '/home/ruby/afeefa-frontend-api'
 set :branch, 'master'
 
 # role-based syntax
