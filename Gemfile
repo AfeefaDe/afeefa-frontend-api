@@ -40,7 +40,7 @@ group :development, :test do
   gem 'byebug', platform: :mri
   gem 'ruby-debug-ide'
   # TODO: Do we need this anymore?
-  # gem 'debase'
+  gem 'debase'
 
   # test framework
   gem 'minitest-rails'

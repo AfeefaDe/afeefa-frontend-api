@@ -78,6 +78,9 @@ GEM
       deep_merge (~> 1.2, >= 1.2.1)
       dry-validation (~> 1.0, >= 1.0.0)
     crass (1.0.6)
+    debase (0.2.4.1)
+      debase-ruby_core_source (>= 0.10.2)
+    debase-ruby_core_source (0.10.11)
     deep_merge (1.2.1)
     docile (1.3.2)
     domain_name (0.5.20190701)
@@ -231,6 +234,8 @@ GEM
     regexp_parser (1.8.2)
     require_all (3.0.0)
     rexml (3.2.4)
+    ruby-debug-ide (0.7.2)
+      rake (>= 0.8.1)
     ruby-graphviz (1.2.5)
       rexml
     ruby-prof (1.4.2)
@@ -278,9 +283,11 @@ PLATFORMS
 
 DEPENDENCIES
   bullet
+  byebug
   capistrano-rails
   capistrano-rbenv
   config
+  debase
   factory_bot_rails
   http
   listen
@@ -297,6 +304,7 @@ DEPENDENCIES
   rails (~> 5.0.2)
   rails-erd
   rails_best_practices
+  ruby-debug-ide
   ruby-prof
   shoulda-context
   simplecov
