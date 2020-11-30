@@ -463,8 +463,8 @@ class EntriesControllerTest < ActionController::TestCase
 
   test 'should raise not found if orga has no contact data' do
     orga = Orga.last
-    ContactInfo.where(contactable: orga).destroy_all
-    assert ContactInfo.where(contactable: orga).blank?
+    DataPlugins::Contact::Contact.where(owner: orga).destroy_all
+    assert DataPlugins::Contact::Contact.where(owner: orga).blank?
 
     assert_raise ActiveRecord::RecordNotFound do
       post :contact_entry, params: {
