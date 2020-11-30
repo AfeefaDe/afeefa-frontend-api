@@ -44,3 +44,11 @@ This command entirely rebuilds the data cached for use in frontend.
 Runs automatically after each deployment.
 
 `cap [dev|production] cache:build_all`
+
+## Testing
+
+```
+bundle exec rails db:environment:set RAILS_ENV=test test
+
+bundle exec rails test -n EntriesControllerTest#test_should_raise_not_found_if_orga_has_no_contact_data
+```
