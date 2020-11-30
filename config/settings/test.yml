@@ -1,2 +1,4 @@
+changes:
+  webhook_api_token: thisisatesttoken
 cache:
   path: test/cache

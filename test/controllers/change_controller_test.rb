@@ -15,16 +15,12 @@ class ChangeControllerTest < ActionController::TestCase
   end
 
   it 'should get status 200 for valid webhook token' do
-    # TODO: Fix this test, mock api!
-    skip 'fix this test, mock api'
     @controller.expects(:update)
     get :update, params: { token: Settings.changes.webhook_api_token }
     assert_response :no_content
   end
 
   it 'should trigger cache rebuild job' do
-    # TODO: Fix this test, mock api!
-    skip 'fix this test, mock api'
     assert_enqueued_jobs 1, only: FrontendCacheRebuildJob do
       get :update, params: { token: Settings.changes.webhook_api_token }
     end
