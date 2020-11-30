@@ -48,7 +48,7 @@ class CacheBuilder
         end
       when 'facet_item'
         build_facets
-      when 'navigation_item'
+      when 'fe_navigation_item'
         build_navigation(entry.area)
       end
 
@@ -67,7 +67,7 @@ class CacheBuilder
       remove_entry_from_file(area, type, id)
     when 'facet_item'
       build_facets
-    when 'navigation_item'
+    when 'fe_navigation_item'
       build_navigation(area)
     end
 
@@ -147,6 +147,10 @@ class CacheBuilder
     cache_file_path = File.join(CACHE_PATH, "lang-#{locale}-#{area}.json").to_s
     json = read_cache_file(cache_file_path)
 
+    if type == 'fe_navigation_item'
+      type = 'navigation_item'
+    end
+
     entry_found = false
     if json[type + 's']
       json[type + 's'].map! do |json_entry|
@@ -171,6 +175,10 @@ class CacheBuilder
   def update_entry_file(type, id, entry)
     cache_file_path = File.join(CACHE_PATH, "entries-#{entry.area}.json").to_s
     json = read_cache_file(cache_file_path)
+
+    if type == 'fe_navigation_item'
+      type = 'navigation_item'
+    end
 
     entry_found = false
     json[type + 's'].map! do |json_entry|
@@ -201,6 +209,10 @@ class CacheBuilder
     cache_file_path = File.join(CACHE_PATH, "entries-#{area}.json").to_s
     json = read_cache_file(cache_file_path)
 
+    if type == 'fe_navigation_item'
+      type = 'navigation_item'
+    end
+
     json[type + 's'].select! do |json_entry|
       if json_entry['id'].to_s == id.to_s
         false
@@ -218,6 +230,10 @@ class CacheBuilder
     locales.each do |locale|
       cache_file_path = File.join(CACHE_PATH, "lang-#{locale}-#{area}.json").to_s
       json = read_cache_file(cache_file_path)
+
+      if type == 'fe_navigation_item'
+        type = 'navigation_item'
+      end
 
       json[type + 's'].select! do |json_entry|
         if json_entry['id'].to_s == id.to_s
@@ -288,7 +304,7 @@ class CacheBuilder
       entry = DataModules::Offer::Offer.find_by(id: id)
     when 'facet_item'
       entry = DataPlugins::Facet::FacetItem.find_by(id: id)
-    when 'navigation_item'
+    when 'fe_navigation_item'
       entry = DataModules::FeNavigation::FeNavigationItem.find_by(id: id)
     end
     entry
