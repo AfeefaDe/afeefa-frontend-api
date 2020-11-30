@@ -33,17 +33,17 @@ class FrontendCacheRebuildJob < ApplicationJob
 
     # update entry
     elsif job.entry && job.updated
-      entry_type = job.entry.class.name.to_s.split('::').last.downcase.underscore
+      entry_type = job.entry.class.name.to_s.split('::').last.underscore
       cache_builder.update_entry(entry_type, job.entry.id)
 
     # translate entry
     elsif job.entry && job.translated && job.language
-      entry_type = job.entry.class.name.to_s.split('::').last.downcase.underscore
+      entry_type = job.entry.class.name.to_s.split('::').last.underscore
       cache_builder.translate_entry(entry_type, job.entry.id, job.language)
 
     # delete entry
     elsif job.area && job.entry && job.deleted
-      entry_type = job.entry.class.name.to_s.split('::').last.downcase.underscore
+      entry_type = job.entry.class.name.to_s.split('::').last.underscore
       cache_builder.remove_entry(job.area.title, entry_type, job.entry.id)
 
     # update all entries for area
